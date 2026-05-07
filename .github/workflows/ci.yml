@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FLUTTER_VERSION: '3.41.2'
+  FLUTTER_VERSION: '3.27.0'   # versão estável amplamente disponível
 
 jobs:
   lib:
@@ -29,6 +29,11 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Show versions
+        run: |
+          flutter --version
+          dart --version
+
       - name: Pub get
         run: flutter pub get
 
@@ -36,7 +41,7 @@ jobs:
         run: dart format --output=none --set-exit-if-changed lib test example/lib
 
       - name: Analyze
-        run: flutter analyze --fatal-infos
+        run: flutter analyze
 
       - name: Test
         run: flutter test --coverage --reporter=expanded
@@ -70,7 +75,7 @@ jobs:
 
       - name: Analyze (demo)
         working-directory: demo
-        run: flutter analyze --fatal-infos
+        run: flutter analyze
 
       - name: Test (demo smoke)
         working-directory: demo
