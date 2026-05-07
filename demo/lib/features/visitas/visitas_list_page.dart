@@ -34,7 +34,8 @@ class VisitasListPage extends StatelessWidget {
             },
             onCreate: () => _openForm(context, services),
             onItemTap: (v) => _openForm(context, services, existing: v),
-            itemBuilder: (context, v, idx) => _VisitaCard(visita: v, index: idx),
+            itemBuilder: (context, v, idx) =>
+                _VisitaCard(visita: v, index: idx),
             emptyTitle: 'Nenhuma visita',
             emptyMessage: 'Toque no + para criar a primeira',
             searchHint: 'Buscar por PDV, cidade ou ID…',
@@ -70,8 +71,7 @@ class _VisitaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (visita.status) {
-      VisitaStatus.planejada =>
-        visita.atrasada ? Colors.orange : Colors.blue,
+      VisitaStatus.planejada => visita.atrasada ? Colors.orange : Colors.blue,
       VisitaStatus.emAndamento => Colors.amber,
       VisitaStatus.concluida => Colors.green,
       VisitaStatus.cancelada => Colors.grey,

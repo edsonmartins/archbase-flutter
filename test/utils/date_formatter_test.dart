@@ -53,8 +53,8 @@ void main() {
 
   group('ArchbaseDateFormatter.duration', () {
     test('mm:ss para menos de 1h', () {
-      expect(ArchbaseDateFormatter.duration(const Duration(seconds: 75)),
-          '01:15');
+      expect(
+          ArchbaseDateFormatter.duration(const Duration(seconds: 75)), '01:15');
     });
     test('H:mm:ss para 1h+', () {
       expect(

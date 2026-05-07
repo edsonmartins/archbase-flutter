@@ -5,7 +5,15 @@ import 'package:flutter/foundation.dart';
 
 import '../../core/state/archbase_service.dart';
 
-enum ArchbaseConnectionType { none, wifi, mobile, ethernet, vpn, bluetooth, other }
+enum ArchbaseConnectionType {
+  none,
+  wifi,
+  mobile,
+  ethernet,
+  vpn,
+  bluetooth,
+  other
+}
 
 extension on ConnectivityResult {
   ArchbaseConnectionType toArchbase() {

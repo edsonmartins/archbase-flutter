@@ -42,9 +42,7 @@ class LoginPage extends StatelessWidget {
         }
         if (!context.mounted) return null;
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => HomePage(services: services),
-          ),
+          MaterialPageRoute(builder: (_) => HomePage(services: services)),
         );
         return null;
       },
@@ -59,4 +57,3 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
-

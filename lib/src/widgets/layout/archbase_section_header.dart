@@ -10,8 +10,7 @@ class ArchbaseSectionHeader extends StatelessWidget {
     this.subtitle,
     this.icon,
     this.action,
-    this.padding =
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
   });
 
   final String title;

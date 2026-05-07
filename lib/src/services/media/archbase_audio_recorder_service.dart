@@ -43,7 +43,8 @@ class ArchbaseAudioRecorderService extends ArchbaseService {
 
   final ValueNotifier<bool> isRecording = ValueNotifier<bool>(false);
   final ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
-  final ValueNotifier<Duration> elapsed = ValueNotifier<Duration>(Duration.zero);
+  final ValueNotifier<Duration> elapsed =
+      ValueNotifier<Duration>(Duration.zero);
   final ValueNotifier<Duration> playerPosition =
       ValueNotifier<Duration>(Duration.zero);
   final ValueNotifier<Duration> playerDuration =

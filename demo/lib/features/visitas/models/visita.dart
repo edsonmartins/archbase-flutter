@@ -38,8 +38,7 @@ class Visita implements BaseDto {
 
   bool get concluida => status == VisitaStatus.concluida;
   bool get atrasada =>
-      status == VisitaStatus.planejada &&
-      DateTime.now().isAfter(dataAgendada);
+      status == VisitaStatus.planejada && DateTime.now().isAfter(dataAgendada);
 
   Visita copyWith({
     VisitaStatus? status,
@@ -61,20 +60,23 @@ class Visita implements BaseDto {
 
   @override
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'pdv': pdv.toJson(),
-        'status': status.value,
-        'dataAgendada': dataAgendada.toIso8601String(),
-        'dataConclusao': dataConclusao?.toIso8601String(),
-        if (observacao != null) 'observacao': observacao,
-        if (fotoBase64 != null) 'fotoBase64': fotoBase64,
-      };
+    'id': id,
+    'pdv': pdv.toJson(),
+    'status': status.value,
+    'dataAgendada': dataAgendada.toIso8601String(),
+    'dataConclusao': dataConclusao?.toIso8601String(),
+    if (observacao != null) 'observacao': observacao,
+    if (fotoBase64 != null) 'fotoBase64': fotoBase64,
+  };
 
   factory Visita.fromJson(Map<String, dynamic> json) {
     return Visita(
       id: json['id'].toString(),
       pdv: Pdv.fromJson((json['pdv'] as Map).cast<String, dynamic>()),
-      status: LabeledEnums.fromString(VisitaStatus.values, json['status']?.toString()),
+      status: LabeledEnums.fromString(
+        VisitaStatus.values,
+        json['status']?.toString(),
+      ),
       dataAgendada: JsonParse.date(json['dataAgendada']) ?? DateTime.now(),
       dataConclusao: JsonParse.date(json['dataConclusao']),
       observacao: json['observacao']?.toString(),

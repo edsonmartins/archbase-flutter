@@ -29,7 +29,8 @@ class ArchbaseTokenSet {
           .add(Duration(seconds: (json['expiresIn'] as num).toInt()));
     }
     return ArchbaseTokenSet(
-      accessToken: (json['accessToken'] ?? json['access_token'] ?? '').toString(),
+      accessToken:
+          (json['accessToken'] ?? json['access_token'] ?? '').toString(),
       refreshToken: (json['refreshToken'] ?? json['refresh_token'])?.toString(),
       expiresAt: expires,
     );

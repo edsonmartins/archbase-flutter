@@ -42,8 +42,7 @@ void main() {
       expect(v.text, '5');
       v = mask.formatEditUpdate(v, const TextEditingValue(text: '52998'));
       expect(v.text, '529.98');
-      v = mask.formatEditUpdate(v,
-          const TextEditingValue(text: '52998224725'));
+      v = mask.formatEditUpdate(v, const TextEditingValue(text: '52998224725'));
       expect(v.text, '529.982.247-25');
     });
 

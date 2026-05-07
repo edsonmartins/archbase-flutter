@@ -1,5 +1,9 @@
 # Archbase Flutter
 
+[![CI](https://github.com/edsonmartins/archbase-flutter/actions/workflows/ci.yml/badge.svg)](https://github.com/edsonmartins/archbase-flutter/actions/workflows/ci.yml)
+[![Flutter](https://img.shields.io/badge/Flutter-3.22%2B-02569B?logo=flutter)](https://flutter.dev)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 Framework Flutter da família **Archbase** (junto com `archbase-react` e o backend Java). Reúne os padrões que se repetiam nos apps internos (gestor-rq, de-olho-na-obra, vendax-promoter): client HTTP, autenticação, cache offline-first, geolocalização, push notifications, captura de mídia, theme system e widgets/templates de tela prontos.
 
 ## Princípios

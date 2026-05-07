@@ -24,9 +24,7 @@ Future<AppServices> bootstrap() async {
       appName: 'Archbase Demo',
       appVersion: '0.1.0',
       currentEnv: ArchbaseEnv.dev,
-      environments: {
-        ArchbaseEnv.dev: 'http://mock.archbase/api/v1',
-      },
+      environments: {ArchbaseEnv.dev: 'http://mock.archbase/api/v1'},
       tenantId: 'demo',
     ),
   );
@@ -43,8 +41,7 @@ Future<AppServices> bootstrap() async {
   await auth.init();
   ArchbaseBootstrap.setAuthService(auth);
 
-  final themeController =
-      ArchbaseThemeController(ArchbaseBootstrap.storage);
+  final themeController = ArchbaseThemeController(ArchbaseBootstrap.storage);
   await themeController.init();
 
   if (kDebugMode) {

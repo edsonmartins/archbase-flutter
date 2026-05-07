@@ -27,14 +27,20 @@ class VisitasRepository {
   }
 
   Future<Visita> create(Map<String, dynamic> payload) async {
-    final response =
-        await _api.postJson<Visita>('/visitas', payload, Visita.fromJson);
+    final response = await _api.postJson<Visita>(
+      '/visitas',
+      payload,
+      Visita.fromJson,
+    );
     return response.orThrow();
   }
 
   Future<Visita> update(String id, Map<String, dynamic> payload) async {
-    final response =
-        await _api.putJson<Visita>('/visitas/$id', payload, Visita.fromJson);
+    final response = await _api.putJson<Visita>(
+      '/visitas/$id',
+      payload,
+      Visita.fromJson,
+    );
     return response.orThrow();
   }
 

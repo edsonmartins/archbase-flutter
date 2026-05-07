@@ -23,19 +23,14 @@ class _HomePageState extends State<HomePage> {
   late final List<Widget> _pages = [
     VisitasListPage(services: widget.services),
     VisitasHistoryPage(services: widget.services),
-    SettingsPage(
-      services: widget.services,
-      onLogout: _handleLogout,
-    ),
+    SettingsPage(services: widget.services, onLogout: _handleLogout),
   ];
 
   Future<void> _handleLogout() async {
     await widget.services.auth.logout();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (_) => LoginPage(services: widget.services),
-      ),
+      MaterialPageRoute(builder: (_) => LoginPage(services: widget.services)),
       (_) => false,
     );
   }
@@ -54,13 +49,17 @@ class _HomePageState extends State<HomePage> {
             label: 'Visitas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(LucideIcons.history,
-                key: ValueKey(TestKeys.tabHistorico)),
+            icon: Icon(
+              LucideIcons.history,
+              key: ValueKey(TestKeys.tabHistorico),
+            ),
             label: 'Histórico',
           ),
           BottomNavigationBarItem(
-            icon:
-                Icon(LucideIcons.settings, key: ValueKey(TestKeys.tabSettings)),
+            icon: Icon(
+              LucideIcons.settings,
+              key: ValueKey(TestKeys.tabSettings),
+            ),
             label: 'Settings',
           ),
         ],

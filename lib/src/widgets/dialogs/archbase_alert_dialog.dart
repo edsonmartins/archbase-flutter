@@ -43,12 +43,15 @@ class ArchbaseAlertDialog extends StatelessWidget {
     final colors = context.archbaseColors;
     final (icon, color) = switch (severity) {
       ArchbaseAlertSeverity.info => (LucideIcons.info, colors.info),
-      ArchbaseAlertSeverity.success =>
-        (LucideIcons.circleCheck, colors.success),
-      ArchbaseAlertSeverity.warning =>
-        (LucideIcons.triangleAlert, colors.warning),
-      ArchbaseAlertSeverity.error =>
-        (LucideIcons.circleAlert, colors.error),
+      ArchbaseAlertSeverity.success => (
+          LucideIcons.circleCheck,
+          colors.success
+        ),
+      ArchbaseAlertSeverity.warning => (
+          LucideIcons.triangleAlert,
+          colors.warning
+        ),
+      ArchbaseAlertSeverity.error => (LucideIcons.circleAlert, colors.error),
     };
 
     return AlertDialog(

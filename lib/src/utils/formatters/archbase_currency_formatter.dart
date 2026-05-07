@@ -8,8 +8,7 @@ class ArchbaseCurrencyFormatter {
       NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$', decimalDigits: 2);
   static final NumberFormat _brlCompact =
       NumberFormat.compactCurrency(locale: 'pt_BR', symbol: 'R\$');
-  static final NumberFormat _decimal =
-      NumberFormat.decimalPattern('pt_BR');
+  static final NumberFormat _decimal = NumberFormat.decimalPattern('pt_BR');
 
   static String brl(num value) => _brl.format(value);
   static String brlCompact(num value) => _brlCompact.format(value);

@@ -35,7 +35,8 @@ class ArchbaseErrorInterceptor extends Interceptor {
           .toString();
       code = data['code']?.toString();
       path = data['path']?.toString();
-      final rawErrors = data['errors'] ?? data['fieldErrors'] ?? data['subErrors'];
+      final rawErrors =
+          data['errors'] ?? data['fieldErrors'] ?? data['subErrors'];
       if (rawErrors is List) {
         fields = rawErrors
             .whereType<Map>()

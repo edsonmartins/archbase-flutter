@@ -48,8 +48,8 @@ class ArchbasePhotoGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.archbase;
-    final canAdd = onAdd != null &&
-        (maxPhotos == null || photos.length < maxPhotos!);
+    final canAdd =
+        onAdd != null && (maxPhotos == null || photos.length < maxPhotos!);
     return SizedBox(
       height: height,
       child: ListView.separated(
@@ -59,7 +59,8 @@ class ArchbasePhotoGallery extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, idx) {
           if (canAdd && idx == photos.length) {
-            return _AddTile(onTap: onAdd!, height: height, color: colors.border);
+            return _AddTile(
+                onTap: onAdd!, height: height, color: colors.border);
           }
           final photo = photos[idx];
           return _Thumb(
@@ -76,7 +77,8 @@ class ArchbasePhotoGallery extends StatelessWidget {
   void _openViewer(BuildContext context, int initialIndex) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => _GalleryViewer(photos: photos, initialIndex: initialIndex),
+        builder: (_) =>
+            _GalleryViewer(photos: photos, initialIndex: initialIndex),
       ),
     );
   }
@@ -121,8 +123,8 @@ class _Thumb extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   padding: const EdgeInsets.all(4),
-                  child: const Icon(LucideIcons.x,
-                      color: Colors.white, size: 14),
+                  child:
+                      const Icon(LucideIcons.x, color: Colors.white, size: 14),
                 ),
               ),
             ),
@@ -136,10 +138,9 @@ class _Thumb extends StatelessWidget {
       return CachedNetworkImage(
         imageUrl: photo.url!,
         fit: BoxFit.cover,
-        placeholder: (_, __) =>
-            const ColoredBox(color: Colors.black12),
-        errorWidget: (_, __, ___) =>
-            const ColoredBox(color: Colors.black12, child: Icon(LucideIcons.image)),
+        placeholder: (_, __) => const ColoredBox(color: Colors.black12),
+        errorWidget: (_, __, ___) => const ColoredBox(
+            color: Colors.black12, child: Icon(LucideIcons.image)),
       );
     }
     if (photo.localPath != null) {
@@ -150,7 +151,8 @@ class _Thumb extends StatelessWidget {
 }
 
 class _AddTile extends StatelessWidget {
-  const _AddTile({required this.onTap, required this.height, required this.color});
+  const _AddTile(
+      {required this.onTap, required this.height, required this.color});
 
   final VoidCallback onTap;
   final double height;
@@ -165,7 +167,8 @@ class _AddTile extends StatelessWidget {
         width: height,
         height: height,
         decoration: BoxDecoration(
-          border: Border.all(color: color, width: 1.5, style: BorderStyle.solid),
+          border:
+              Border.all(color: color, width: 1.5, style: BorderStyle.solid),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(LucideIcons.plus),

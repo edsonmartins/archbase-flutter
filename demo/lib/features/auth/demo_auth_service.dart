@@ -3,10 +3,8 @@ import 'package:archbase_flutter/archbase_flutter.dart';
 /// AuthService concreto do demo. Bate em /auth/login e /auth/refresh
 /// (ambos servidos pelo `MockApiAdapter`).
 class DemoAuthService extends ArchbaseAuthService<SimpleArchbaseUser> {
-  DemoAuthService({
-    required super.apiClient,
-    required super.tokens,
-  }) : super(userFromJson: SimpleArchbaseUser.fromJson);
+  DemoAuthService({required super.apiClient, required super.tokens})
+    : super(userFromJson: SimpleArchbaseUser.fromJson);
 
   @override
   Future<ArchbaseLoginResult<SimpleArchbaseUser>> performLogin(
@@ -18,9 +16,7 @@ class DemoAuthService extends ArchbaseAuthService<SimpleArchbaseUser> {
       (json) => json,
     );
     if (response.isError || response.data == null) {
-      throw InvalidCredentialsException(
-        response.message ?? 'Falha no login',
-      );
+      throw InvalidCredentialsException(response.message ?? 'Falha no login');
     }
     final data = response.data!;
     final tokens = ArchbaseTokenSet.fromJson(data);

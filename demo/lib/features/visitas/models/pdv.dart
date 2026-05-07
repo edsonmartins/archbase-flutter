@@ -27,15 +27,15 @@ class Pdv implements BaseDto {
 
   @override
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'nome': nome,
-        'endereco': endereco,
-        'cidade': cidade,
-        'uf': uf,
-        'latitude': latitude,
-        'longitude': longitude,
-        if (responsavel != null) 'responsavel': responsavel,
-      };
+    'id': id,
+    'nome': nome,
+    'endereco': endereco,
+    'cidade': cidade,
+    'uf': uf,
+    'latitude': latitude,
+    'longitude': longitude,
+    if (responsavel != null) 'responsavel': responsavel,
+  };
 
   factory Pdv.fromJson(Map<String, dynamic> json) {
     return Pdv(

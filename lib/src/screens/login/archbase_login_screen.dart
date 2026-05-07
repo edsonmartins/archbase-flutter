@@ -299,11 +299,13 @@ class _DevUserPicker extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.archbase.warning.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colors.archbase.warning.withValues(alpha: 0.5)),
+        border:
+            Border.all(color: colors.archbase.warning.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
-          Icon(LucideIcons.flaskConical, color: colors.archbase.warning, size: 18),
+          Icon(LucideIcons.flaskConical,
+              color: colors.archbase.warning, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: DropdownButtonHideUnderline(

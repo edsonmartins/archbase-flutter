@@ -10,11 +10,7 @@ import 'visitas_repository.dart';
 
 /// Form de criar / editar visita.
 class VisitaFormPage extends StatefulWidget {
-  const VisitaFormPage({
-    super.key,
-    required this.services,
-    this.existing,
-  });
+  const VisitaFormPage({super.key, required this.services, this.existing});
 
   final AppServices services;
   final Visita? existing;
@@ -152,8 +148,13 @@ class _VisitaFormPageState extends State<VisitaFormPage> {
     );
     if (time == null) return;
     setState(() {
-      _dataAgendada =
-          DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _dataAgendada = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
     });
   }
 }

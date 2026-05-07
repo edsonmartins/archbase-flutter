@@ -93,10 +93,11 @@ class ArchbaseButton extends StatelessWidget {
         break;
     }
 
-    final wrapped = fullWidth
-        ? SizedBox(width: double.infinity, child: button)
-        : button;
-    return tooltip == null ? wrapped : Tooltip(message: tooltip!, child: wrapped);
+    final wrapped =
+        fullWidth ? SizedBox(width: double.infinity, child: button) : button;
+    return tooltip == null
+        ? wrapped
+        : Tooltip(message: tooltip!, child: wrapped);
   }
 
   EdgeInsets _padding() {

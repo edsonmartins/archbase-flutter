@@ -14,8 +14,7 @@ class TokenExpiredException extends AuthException {
 }
 
 class RefreshFailedException extends AuthException {
-  RefreshFailedException(
-      [super.message = 'Não foi possível renovar a sessão']);
+  RefreshFailedException([super.message = 'Não foi possível renovar a sessão']);
 }
 
 class AccountLockedException extends AuthException {

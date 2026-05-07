@@ -14,7 +14,8 @@ class ArchbaseShimmer extends StatelessWidget {
     final isDark = context.isDarkMode;
     return Shimmer.fromColors(
       baseColor: isDark ? const Color(0xFF2A2C32) : const Color(0xFFE6E8EB),
-      highlightColor: isDark ? const Color(0xFF373A41) : const Color(0xFFF7F8FA),
+      highlightColor:
+          isDark ? const Color(0xFF373A41) : const Color(0xFFF7F8FA),
       child: child,
     );
   }

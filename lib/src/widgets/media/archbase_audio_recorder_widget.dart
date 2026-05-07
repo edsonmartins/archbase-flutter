@@ -54,7 +54,9 @@ class _ArchbaseAudioRecorderWidgetState
         child: ValueListenableBuilder<bool>(
           valueListenable: widget.service.isRecording,
           builder: (_, isRec, __) {
-            if (isRec) return _RecordingView(service: widget.service, onStop: _onStop);
+            if (isRec) {
+              return _RecordingView(service: widget.service, onStop: _onStop);
+            }
             if (_path != null) {
               return _PlaybackView(
                 service: widget.service,
@@ -204,11 +206,13 @@ class _PlaybackView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                ArchbaseAudioRecorderService.formatDuration(pos),
+                                ArchbaseAudioRecorderService.formatDuration(
+                                    pos),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               Text(
-                                ArchbaseAudioRecorderService.formatDuration(dur),
+                                ArchbaseAudioRecorderService.formatDuration(
+                                    dur),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],

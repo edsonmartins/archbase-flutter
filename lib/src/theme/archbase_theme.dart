@@ -147,7 +147,8 @@ class ArchbaseTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          textStyle:
+              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
           elevation: 0,
         ),
       ),
@@ -165,7 +166,8 @@ class ArchbaseTheme {
         style: TextButton.styleFrom(foregroundColor: colors.primary),
       ),
       dividerColor: borderColor,
-      dividerTheme: DividerThemeData(color: borderColor, space: 1, thickness: 1),
+      dividerTheme:
+          DividerThemeData(color: borderColor, space: 1, thickness: 1),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: cardColor,
         selectedItemColor: colors.primary,
@@ -234,7 +236,8 @@ class ArchbaseThemeColors extends ThemeExtension<ArchbaseThemeColors> {
   }
 
   @override
-  ArchbaseThemeColors lerp(ThemeExtension<ArchbaseThemeColors>? other, double t) {
+  ArchbaseThemeColors lerp(
+      ThemeExtension<ArchbaseThemeColors>? other, double t) {
     if (other is! ArchbaseThemeColors) return this;
     return ArchbaseThemeColors(
       archbase: archbase,

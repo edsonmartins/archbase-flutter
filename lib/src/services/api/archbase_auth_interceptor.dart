@@ -75,7 +75,10 @@ class ArchbaseAuthInterceptor extends Interceptor {
     final isRefreshCall = err.requestOptions.extra['__isRefresh'] == true;
     final hasRetried = err.requestOptions.extra['__retried'] == true;
 
-    if (!isAuthError || isRefreshCall || hasRetried || _isPublic(err.requestOptions.path)) {
+    if (!isAuthError ||
+        isRefreshCall ||
+        hasRetried ||
+        _isPublic(err.requestOptions.path)) {
       handler.next(err);
       return;
     }

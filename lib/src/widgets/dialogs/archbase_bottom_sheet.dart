@@ -47,8 +47,7 @@ class ArchbaseBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.archbase;
     final body = Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

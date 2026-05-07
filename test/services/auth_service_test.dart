@@ -13,8 +13,13 @@ void main() {
     mockSecureStorage();
   });
 
-  Future<(FakeArchbaseAuthService, ArchbaseStorageService, ArchbaseTokenHolder,
-      ArchbaseApiClient)> setup({
+  Future<
+      (
+        FakeArchbaseAuthService,
+        ArchbaseStorageService,
+        ArchbaseTokenHolder,
+        ArchbaseApiClient
+      )> setup({
     bool failOnLogin = false,
     bool failOnRefresh = false,
   }) async {
@@ -45,7 +50,8 @@ void main() {
   group('ArchbaseAuthService — login/logout', () {
     test('login bem-sucedido persiste tokens e emite onLoggedIn', () async {
       final (auth, _, tokens, api) = await setup();
-      final logged = expectLater(auth.onLoggedIn, emits(isA<SimpleArchbaseUser>()));
+      final logged =
+          expectLater(auth.onLoggedIn, emits(isA<SimpleArchbaseUser>()));
 
       await auth.login({'username': 'edson@test.dev', 'password': 'archbase'});
 
@@ -90,8 +96,7 @@ void main() {
       api.dispose();
     });
 
-    test('logout(callRemote: false) não chama performRemoteLogout',
-        () async {
+    test('logout(callRemote: false) não chama performRemoteLogout', () async {
       final (auth, _, _, api) = await setup();
       await auth.login({'username': 'a', 'password': 'b'});
       await auth.logout(callRemote: false);

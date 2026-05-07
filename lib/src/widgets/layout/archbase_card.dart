@@ -31,8 +31,7 @@ class ArchbaseCard extends StatelessWidget {
     this.status,
     this.onTap,
     this.padding = const EdgeInsets.all(14),
-    this.margin =
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    this.margin = const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
   });
 
   final String? title;
@@ -71,7 +70,9 @@ class ArchbaseCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (title != null || leading != null || trailing != null)
+                        if (title != null ||
+                            leading != null ||
+                            trailing != null)
                           Row(
                             children: [
                               if (leading != null) ...[

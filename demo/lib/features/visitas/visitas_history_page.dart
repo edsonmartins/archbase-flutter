@@ -13,14 +13,15 @@ class VisitasHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final concluidas = MockDatabase.instance.visitas.values
-        .where((v) => v.status == VisitaStatus.concluida)
-        .toList()
-      ..sort(
-        (a, b) =>
-            (b.dataConclusao ?? b.dataAgendada)
-                .compareTo(a.dataConclusao ?? a.dataAgendada),
-      );
+    final concluidas =
+        MockDatabase.instance.visitas.values
+            .where((v) => v.status == VisitaStatus.concluida)
+            .toList()
+          ..sort(
+            (a, b) => (b.dataConclusao ?? b.dataAgendada).compareTo(
+              a.dataConclusao ?? a.dataAgendada,
+            ),
+          );
 
     return Scaffold(
       appBar: const ArchbaseAppBar(
@@ -39,8 +40,10 @@ class VisitasHistoryPage extends StatelessWidget {
               itemBuilder: (context, idx) {
                 final v = concluidas[idx];
                 return ArchbaseCard(
-                  leading: const Icon(LucideIcons.circleCheck,
-                      color: Colors.green),
+                  leading: const Icon(
+                    LucideIcons.circleCheck,
+                    color: Colors.green,
+                  ),
                   title: v.pdv.nome,
                   subtitle:
                       '${v.pdv.cidadeUf} · ${ArchbaseDateFormatter.relative(v.dataConclusao ?? v.dataAgendada)}',

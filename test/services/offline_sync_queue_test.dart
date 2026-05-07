@@ -53,8 +53,13 @@ void main() {
     mockSecureStorage();
   });
 
-  Future<(ArchbaseApiClient, _CountingAdapter, FakeConnectivity,
-      ArchbaseStorageService)> setup({
+  Future<
+      (
+        ArchbaseApiClient,
+        _CountingAdapter,
+        FakeConnectivity,
+        ArchbaseStorageService
+      )> setup({
     int failTimes = 0,
     String boxName = 'queue_test',
   }) async {
@@ -84,8 +89,7 @@ void main() {
   group('ArchbaseOfflineSyncQueue', () {
     test('enqueue + flush envia operação e remove da fila quando online',
         () async {
-      final (api, adapter, conn, _) =
-          await setup(boxName: 'queue_basic');
+      final (api, adapter, conn, _) = await setup(boxName: 'queue_basic');
       final queue = ArchbaseOfflineSyncQueue(
         api: api,
         connectivity: conn,
@@ -112,8 +116,7 @@ void main() {
     });
 
     test('flush não envia quando offline', () async {
-      final (api, adapter, conn, _) =
-          await setup(boxName: 'queue_offline');
+      final (api, adapter, conn, _) = await setup(boxName: 'queue_offline');
       conn.setOnline(false);
       final queue = ArchbaseOfflineSyncQueue(
         api: api,
@@ -159,8 +162,7 @@ void main() {
     });
 
     test('reconexão dispara flush automático', () async {
-      final (api, adapter, conn, _) =
-          await setup(boxName: 'queue_reconnect');
+      final (api, adapter, conn, _) = await setup(boxName: 'queue_reconnect');
       conn.setOnline(false);
       final queue = ArchbaseOfflineSyncQueue(
         api: api,
@@ -223,7 +225,8 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 5));
       await queue.enqueue(method: SyncMethod.post, path: '/b');
 
-      final ops = queue.peekAll()..sort((x, y) => x.createdAt.compareTo(y.createdAt));
+      final ops = queue.peekAll()
+        ..sort((x, y) => x.createdAt.compareTo(y.createdAt));
       expect(ops.first.path, '/a');
       expect(ops.last.path, '/b');
 

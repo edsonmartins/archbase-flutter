@@ -69,7 +69,8 @@ void main() {
     test('rejeita senhas fracas', () {
       expect(ArchbaseValidators.strongPassword('senha'), isNotNull);
       expect(ArchbaseValidators.strongPassword('SenhaSemNum!'), isNotNull);
-      expect(ArchbaseValidators.strongPassword('Senha1234'), isNotNull); // sem símbolo
+      expect(ArchbaseValidators.strongPassword('Senha1234'),
+          isNotNull); // sem símbolo
     });
   });
 

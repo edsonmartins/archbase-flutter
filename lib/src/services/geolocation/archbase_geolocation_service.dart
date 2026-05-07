@@ -67,8 +67,8 @@ class ArchbaseGeolocationService extends ArchbaseService {
   Future<void> onInit() async {
     serviceEnabled.value = await Geolocator.isLocationServiceEnabled();
     final perm = await Geolocator.checkPermission();
-    hasPermission.value =
-        perm == LocationPermission.always || perm == LocationPermission.whileInUse;
+    hasPermission.value = perm == LocationPermission.always ||
+        perm == LocationPermission.whileInUse;
   }
 
   Future<bool> ensurePermission() async {

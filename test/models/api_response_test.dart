@@ -31,8 +31,8 @@ void main() {
       final r = ApiResponse<int>.error('Boom', statusCode: 500);
       expect(
         () => r.orThrow(),
-        throwsA(isA<ApiException>()
-            .having((e) => e.statusCode, 'statusCode', 500)),
+        throwsA(
+            isA<ApiException>().having((e) => e.statusCode, 'statusCode', 500)),
       );
     });
 

@@ -53,7 +53,8 @@ void main() {
       expect(find.text('Credenciais inválidas'), findsOneWidget);
     });
 
-    testWidgets('campos vazios dispara mensagem de obrigatório', (tester) async {
+    testWidgets('campos vazios dispara mensagem de obrigatório',
+        (tester) async {
       var called = false;
       await tester.pumpWidget(
         TestApp(

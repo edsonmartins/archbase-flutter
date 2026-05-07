@@ -142,8 +142,7 @@ class _ArchbaseCrudFormScreenState extends State<ArchbaseCrudFormScreen> {
                       icon: LucideIcons.trash2,
                       variant: ArchbaseButtonVariant.danger,
                       isLoading: _deleting,
-                      onPressed:
-                          _saving || _deleting ? null : _delete,
+                      onPressed: _saving || _deleting ? null : _delete,
                     ),
                   ),
                 if (widget.onDelete != null) const SizedBox(width: 12),

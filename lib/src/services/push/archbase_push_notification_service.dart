@@ -80,7 +80,8 @@ class ArchbasePushNotificationService extends ArchbaseService {
 
   final ValueNotifier<String?> token = ValueNotifier<String?>(null);
 
-  final _onMessageController = StreamController<ArchbasePushMessage>.broadcast();
+  final _onMessageController =
+      StreamController<ArchbasePushMessage>.broadcast();
   final _onMessageOpenedController =
       StreamController<ArchbasePushMessage>.broadcast();
 
@@ -120,9 +121,8 @@ class ArchbasePushNotificationService extends ArchbaseService {
     );
 
     if (Platform.isAndroid) {
-      final android =
-          _local.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+      final android = _local.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
       for (final ch in channels) {
         await android?.createNotificationChannel(
           AndroidNotificationChannel(

@@ -7,7 +7,8 @@ import 'fake_auth_service.dart';
 import 'gallery_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.themeController, required this.auth});
+  const HomePage(
+      {super.key, required this.themeController, required this.auth});
 
   final ArchbaseThemeController themeController;
   final FakeAuthService auth;

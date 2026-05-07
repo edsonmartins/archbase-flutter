@@ -77,8 +77,7 @@ class MockApiAdapter implements HttpClientAdapter {
         return _json(401, {'message': 'Credenciais inválidas'});
       }
       return _json(200, {
-        'accessToken':
-            'demo-access-${DateTime.now().millisecondsSinceEpoch}',
+        'accessToken': 'demo-access-${DateTime.now().millisecondsSinceEpoch}',
         'refreshToken': 'demo-refresh',
         'expiresIn': 3600,
         'user': {
@@ -91,8 +90,7 @@ class MockApiAdapter implements HttpClientAdapter {
     }
     if (method == 'POST' && path.endsWith('/auth/refresh')) {
       return _json(200, {
-        'accessToken':
-            'demo-access-${DateTime.now().millisecondsSinceEpoch}',
+        'accessToken': 'demo-access-${DateTime.now().millisecondsSinceEpoch}',
         'refreshToken': 'demo-refresh',
         'expiresIn': 3600,
       });
@@ -140,7 +138,7 @@ class MockApiAdapter implements HttpClientAdapter {
         status: _statusFromBody(body),
         dataAgendada:
             DateTime.tryParse(body['dataAgendada']?.toString() ?? '') ??
-                DateTime.now(),
+            DateTime.now(),
         observacao: body['observacao']?.toString(),
         fotoBase64: body['fotoBase64']?.toString(),
       );
@@ -159,14 +157,14 @@ class MockApiAdapter implements HttpClientAdapter {
         dataAgendada: body == null
             ? existing.dataAgendada
             : DateTime.tryParse(body['dataAgendada']?.toString() ?? '') ??
-                existing.dataAgendada,
+                  existing.dataAgendada,
         observacao: body?['observacao']?.toString() ?? existing.observacao,
         fotoBase64: body?['fotoBase64']?.toString() ?? existing.fotoBase64,
         dataConclusao:
             (_statusFromBody(body, fallback: existing.status) ==
-                    VisitaStatus.concluida)
-                ? DateTime.now()
-                : existing.dataConclusao,
+                VisitaStatus.concluida)
+            ? DateTime.now()
+            : existing.dataConclusao,
       );
       db.visitas[id] = updated;
       return _json(200, updated.toJson());

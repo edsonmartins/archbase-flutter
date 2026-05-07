@@ -78,7 +78,8 @@ class _ArchbaseSignaturePadState extends State<ArchbaseSignaturePad> {
             borderRadius: BorderRadius.circular(12),
             child: Stack(
               children: [
-                Signature(controller: _controller, backgroundColor: Colors.white),
+                Signature(
+                    controller: _controller, backgroundColor: Colors.white),
                 if (_controller.isEmpty)
                   Center(
                     child: Text(

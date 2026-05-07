@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancela runs antigos do mesmo PR / branch para economizar minutos.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.41.2'
+
+jobs:
+  lib:
+    name: archbase_flutter (lib)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed lib test example/lib
+
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        run: flutter test --coverage --reporter=expanded
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lib
+          path: coverage/lcov.info
+          retention-days: 14
+
+  demo:
+    name: archbase_demo (analyze + smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lib
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Pub get (demo)
+        working-directory: demo
+        run: flutter pub get
+
+      - name: Analyze (demo)
+        working-directory: demo
+        run: flutter analyze --fatal-infos
+
+      - name: Test (demo smoke)
+        working-directory: demo
+        run: flutter test
+
+  build-android:
+    name: Build APK (debug)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: demo
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        working-directory: demo
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: demo
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: archbase-demo-debug-apk
+          path: demo/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 14

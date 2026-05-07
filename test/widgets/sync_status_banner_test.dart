@@ -53,8 +53,8 @@ void main() {
     testWidgets('exibe contador de pendentes quando offline com fila',
         (tester) async {
       final online = ValueNotifier<bool>(false);
-      final status =
-          ValueNotifier<ArchbaseSyncStatus>(const ArchbaseSyncStatus(pending: 3));
+      final status = ValueNotifier<ArchbaseSyncStatus>(
+          const ArchbaseSyncStatus(pending: 3));
       addTearDown(() {
         online.dispose();
         status.dispose();

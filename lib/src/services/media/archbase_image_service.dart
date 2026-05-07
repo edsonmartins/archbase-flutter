@@ -44,8 +44,7 @@ class ArchbaseImageService {
   }) async {
     final file = await _picker.pickImage(
       source: ImageSource.camera,
-      preferredCameraDevice:
-          front ? CameraDevice.front : CameraDevice.rear,
+      preferredCameraDevice: front ? CameraDevice.front : CameraDevice.rear,
       imageQuality: compress ? compressQuality : 100,
       maxWidth: compress ? maxDimension.toDouble() : null,
     );
@@ -76,7 +75,8 @@ class ArchbaseImageService {
     return results;
   }
 
-  Future<ArchbaseImage?> _materialize(XFile? file, {required bool compress}) async {
+  Future<ArchbaseImage?> _materialize(XFile? file,
+      {required bool compress}) async {
     if (file == null) return null;
     Uint8List bytes = await file.readAsBytes();
 
@@ -99,7 +99,8 @@ class ArchbaseImageService {
     int? maxDimension,
   }) async {
     final tempDir = await getTemporaryDirectory();
-    final target = '${tempDir.path}/cmp_${DateTime.now().microsecondsSinceEpoch}.jpg';
+    final target =
+        '${tempDir.path}/cmp_${DateTime.now().microsecondsSinceEpoch}.jpg';
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       target,
