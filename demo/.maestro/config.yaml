@@ -1,0 +1,18 @@
+# Configuração compartilhada pelos flows Maestro do demo.
+#
+# `appId` deve casar com o applicationId/CFBundleIdentifier do app —
+# definido no flutter create com --org com.archbase.
+#
+# Use `executionOrder` para garantir que o login rode antes dos demais.
+appId: com.archbase.archbase_demo
+
+# Flutter envolve toda a árvore num FlutterView. O Maestro usa engine de
+# acessibilidade nativa, então identificadores baseados em ValueKey
+# (em widgets Flutter) aparecem como `accessibilityIdentifier` no iOS e
+# como `tag` na semantics tree do Android.
+executionOrder:
+  flowsOrder:
+    - 01_login
+    - 02_crud
+    - 03_offline
+    - 04_settings

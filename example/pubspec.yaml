@@ -1,0 +1,23 @@
+name: archbase_flutter_example
+description: App de exemplo demonstrando os componentes da archbase_flutter.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  archbase_flutter:
+    path: ..
+  lucide_icons_flutter: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

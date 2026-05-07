@@ -1,0 +1,66 @@
+# Fluxo: CRUD de visitas — criar, ver na lista, editar, excluir.
+#
+# Assume sessão ativa (rodar APÓS 01_login.yaml ou usar runFlow inline).
+appId: com.archbase.archbase_demo
+name: 02 — CRUD de visitas
+tags:
+  - crud
+---
+- launchApp
+
+# Garante que estamos logados — se não, executa o login antes.
+- runFlow:
+    when:
+      notVisible:
+        text: "Visitas"
+    file: 01_login.yaml
+
+# 1) Verificar que a lista carregou (visitas seedadas).
+- assertVisible: "Mercado Bom Preço"
+- assertVisible: "Supermercado Estrela"
+
+# 2) Criar uma nova visita via FAB.
+- tapOn:
+    point: "95%,90%"   # FAB no canto inferior direito
+- assertVisible:
+    text: "Nova visita"
+    timeout: 5000
+
+# Selecionar PDV e status (já com defaults), preencher observação.
+- tapOn:
+    id: "form_observacao"
+- inputText: "Visita criada via Maestro"
+- hideKeyboard
+- tapOn: "Salvar"
+
+# 3) Voltou para a lista — pode aparecer toast de sucesso ou retornar direto.
+- assertVisible:
+    text: "Visitas"
+    timeout: 5000
+
+# 4) Abrir uma visita existente para editar.
+- tapOn: "Mercado Bom Preço"
+- assertVisible:
+    text: "Editar visita"
+    timeout: 5000
+- tapOn:
+    id: "form_observacao"
+- eraseText
+- inputText: "Editado via Maestro"
+- hideKeyboard
+- tapOn: "Salvar"
+- assertVisible:
+    text: "Visitas"
+    timeout: 5000
+
+# 5) Excluir a visita editada.
+- tapOn: "Mercado Bom Preço"
+- assertVisible:
+    text: "Editar visita"
+    timeout: 5000
+- tapOn: "Excluir"
+- assertVisible: "Confirmar exclusão"
+- tapOn: "Confirmar"
+- assertVisible:
+    text: "Visitas"
+    timeout: 5000

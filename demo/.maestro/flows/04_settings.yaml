@@ -1,0 +1,34 @@
+# Fluxo: settings — tema, fonte, alto contraste, logout.
+appId: com.archbase.archbase_demo
+name: 04 — Settings
+tags:
+  - settings
+---
+- launchApp
+- runFlow:
+    when:
+      notVisible:
+        text: "Visitas"
+    file: 01_login.yaml
+
+- tapOn: "Settings"
+- assertVisible: "APARÊNCIA"
+
+# 1) Alternar tema (system → light → dark, ciclo de 3 toques).
+- tapOn: "Tema"
+- tapOn: "Tema"
+- tapOn: "Tema"
+
+# 2) Toggle alto contraste.
+- tapOn: "Alto contraste"
+- tapOn: "Alto contraste"
+
+# 3) Logout — confirma no dialog.
+- tapOn: "Sair"
+- assertVisible: "Sair?"
+- tapOn: "Sair"
+
+# Volta para login.
+- assertVisible:
+    text: "Entrar"
+    timeout: 10000

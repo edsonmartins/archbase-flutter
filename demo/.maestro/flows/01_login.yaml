@@ -1,0 +1,47 @@
+# Fluxo: login — exercita validação, erro e sucesso.
+#
+# Pré-requisito: app instalado mas SEM sessão (clearState ao começar).
+appId: com.archbase.archbase_demo
+name: 01 — Login
+tags:
+  - login
+  - smoke
+---
+- clearState
+- launchApp
+
+# A splash redireciona pra Login automaticamente após ~1s.
+- assertVisible: "Archbase Demo"
+- assertVisible:
+    text: "Entrar"
+
+# 1) Validação: campos vazios
+- tapOn: "Entrar"
+- assertVisible: "Campo obrigatório"
+
+# 2) Credenciais inválidas (senha curta < 4 chars)
+- tapOn:
+    text: "E-mail *"
+- inputText: "edson@archbase.dev"
+- hideKeyboard
+- tapOn:
+    text: "Senha *"
+- inputText: "abc"
+- hideKeyboard
+- tapOn: "Entrar"
+- assertVisible: "Credenciais inválidas"
+
+# 3) Sucesso
+- tapOn:
+    text: "Senha *"
+- eraseText
+- inputText: "archbase"
+- hideKeyboard
+- tapOn: "Entrar"
+
+# Após login, vai para Home (BottomNav com 3 abas).
+- assertVisible:
+    text: "Visitas"
+    timeout: 10000
+- assertVisible: "Histórico"
+- assertVisible: "Settings"

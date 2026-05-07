@@ -1,0 +1,56 @@
+# Fluxo: modo offline — desliga rede simulada, cria visita,
+# vê sync banner, religa rede, valida sync.
+appId: com.archbase.archbase_demo
+name: 03 — Offline + sync
+tags:
+  - offline
+---
+- launchApp
+- runFlow:
+    when:
+      notVisible:
+        text: "Visitas"
+    file: 01_login.yaml
+
+# 1) Vai para Settings → Modo desenvolvedor → liga "Simular offline".
+- tapOn: "Settings"
+- assertVisible: "Modo desenvolvedor"
+- tapOn:
+    id: "dev_toggle_offline"
+
+# 2) Volta para a lista de Visitas.
+- tapOn: "Visitas"
+
+# Sync banner deve aparecer com "Sem conexão" ou "alterações pendentes".
+- assertVisible:
+    text: "Sem conexão"
+    timeout: 5000
+
+# 3) Cria uma visita offline. Como connectivity está false,
+# o app deve enfileirar em vez de chamar a API.
+- tapOn:
+    point: "95%,90%"
+- assertVisible: "Nova visita"
+- tapOn:
+    id: "form_observacao"
+- inputText: "Criado offline"
+- hideKeyboard
+- tapOn: "Salvar"
+- assertVisible: "Visitas"
+
+# Banner agora deve mostrar "1 alterações pendentes".
+- assertVisible:
+    text: "1 alterações"
+    timeout: 5000
+
+# 4) Religa a rede (toggle off).
+- tapOn: "Settings"
+- tapOn:
+    id: "dev_toggle_offline"
+
+# 5) Volta e valida que o banner sumiu (sincronizou).
+- tapOn: "Visitas"
+- assertNotVisible:
+    text: "Sem conexão"
+- assertNotVisible:
+    text: "alterações pendentes"
