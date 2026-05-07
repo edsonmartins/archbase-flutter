@@ -37,7 +37,15 @@ jobs:
         run: dart format --output=none --set-exit-if-changed lib test example/lib
 
       - name: Analyze
-        run: flutter analyze
+        run: flutter analyze 2>&1 | tee analyze.log
+
+      - name: Upload analyze log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyze-log
+          path: analyze.log
+          retention-days: 7
 
       - name: Test
         run: flutter test --coverage --reporter=expanded
