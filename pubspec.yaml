@@ -1,6 +1,6 @@
 name: archbase_flutter
 description: Framework Flutter da família Archbase. Provê services, widgets, templates de tela, theme system, validadores e utils para acelerar o desenvolvimento de apps Flutter empresariais com suporte offline-first.
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/edsonmartins/archbase-flutter
 repository: https://github.com/edsonmartins/archbase-flutter
 

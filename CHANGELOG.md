@@ -1,5 +1,67 @@
 # Changelog
 
+## 0.2.0 — anteros migration
+
+Portagem de componentes selecionados da `anterosflutter` (lib antiga). Tudo
+foi reescrito para Material 3, sem RxDart/Flare e mantendo o estilo
+agnóstico de state management.
+
+### Adicionado
+
+**Validators**
+- `cnh`, `plateBr`, `ageMin`, `url`, `creditCard`, `equal`, `notEqual`,
+  `pattern`, `numericBetween`
+
+**Formatters / máscaras**
+- `ArchbaseMaskFormatter.cnh`, `creditCard`
+- `ArchbasePlateFormatter` (uppercase + alphanumeric, 7 chars)
+
+**Forms (sistema declarativo)**
+- `ArchbaseForm` + `ArchbaseFormController` (gerencia valores e erros sem
+  amarrar a state mgmt externo)
+- `ArchbaseFormTextField` integrado ao controller via `name:`
+- Campos especializados: `ArchbaseFormCpfField`, `CnpjField`, `CnhField`,
+  `PlateField`, `PhoneBrField`, `EmailField`, `CepField`, `BirthDateField`
+
+**Widgets — display**
+- `ArchbaseTextAvatar` (iniciais com cor determinística por hash de texto)
+- `ArchbaseAvatarStack` (avatares sobrepostos com `+N`)
+- `ArchbaseGlassContainer` (glass morphism com BackdropFilter)
+- `ArchbaseCarousel` (paginação, autoplay, loop infinito)
+- `ArchbaseBadgeAdv` (badge posicional sobre um child)
+
+**Widgets — layout**
+- `ArchbaseDraggableHome` (header colapsável, sem RxDart)
+- `ArchbaseFloatingNavBar` (bottom nav flutuante com label inline)
+
+**Widgets — structural**
+- `ArchbaseAccordion` (single ou multi-open)
+- `ArchbaseStickyHeader` + `ArchbaseStickyHeaderDelegate`
+- `ArchbaseTimeline` (vertical com pontos+linha)
+- `ArchbaseClippers`: `WaveClipper`, `ArcClipper`, `DiagonalClipper`,
+  `ArchbaseClippedHeader`
+
+**Widgets — forms**
+- `ArchbaseNumericStepper` (touch spin com -/+)
+- `ArchbaseCountryPicker` (~28 países com bandeiras emoji e dial code)
+
+**Screens**
+- `ArchbaseIntroScreen` (onboarding paginado)
+
+**Utils**
+- `ArchbaseExtensions`: 30+ extensions úteis em String, num, DateTime,
+  List, Iterable, Map, BuildContext
+
+### Testes
+- 186 testes passando (de 138 → 186, +48 novos)
+
+### Não portado (decisão consciente)
+- Wrappers de `flare_flutter` (deprecado)
+- TabBar/ListTile/Drawer wrappers (Material atual cobre)
+- Componentes que duplicam `flutter_colorpicker`, `cool_alert`
+- `phone_number:0.12.0+2` (abandonado) — usar `libphonenumber_plus`
+  ou similares se precisar
+
 ## 0.1.0 — initial
 
 - Setup do pacote, theme system, services base (Api/Auth/Cache/Connectivity/Storage/OfflineSync/Geolocation/Push/Media)

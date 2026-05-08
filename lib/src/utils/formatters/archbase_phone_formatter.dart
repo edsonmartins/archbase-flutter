@@ -74,4 +74,27 @@ class ArchbaseMaskFormatter extends TextInputFormatter {
   static final cnpj = ArchbaseMaskFormatter('##.###.###/####-##');
   static final cep = ArchbaseMaskFormatter('#####-###');
   static final dateBr = ArchbaseMaskFormatter('##/##/####');
+  static final cnh = ArchbaseMaskFormatter('###########');
+  static final creditCard = ArchbaseMaskFormatter('#### #### #### ####');
+}
+
+/// Formatter para placa de veículo brasileira aceitando padrão antigo
+/// (AAA-9999) e Mercosul (AAA9A99). Aceita letras e dígitos, força
+/// uppercase, limita a 7 caracteres alfanuméricos.
+class ArchbasePlateFormatter extends TextInputFormatter {
+  static final _allowed = RegExp(r'[A-Z0-9]');
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final raw = newValue.text.toUpperCase();
+    final filtered =
+        raw.split('').where((c) => _allowed.hasMatch(c)).take(7).join();
+    return TextEditingValue(
+      text: filtered,
+      selection: TextSelection.collapsed(offset: filtered.length),
+    );
+  }
 }

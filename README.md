@@ -104,10 +104,12 @@ Após o `init`, ficam disponíveis (sem container DI):
 
 ### `widgets/`
 - **feedback** — `ArchbaseLoading`, `ArchbaseInlineLoading`, `ArchbaseEmptyState`, `ArchbaseErrorView`, `ArchbaseShimmer`/`ArchbaseShimmerList`, `ArchbaseSyncStatusBanner`
-- **forms** — `ArchbaseTextField`, `ArchbasePasswordField`, `ArchbaseButton` (4 variantes + loading), `ArchbaseDropdown.forEnum<E>()`, `ArchbaseSearchField` (com debounce)
-- **layout** — `ArchbaseAppBar` (título + subtítulo), `ArchbaseScaffold` (com banner offline embutido), `ArchbaseSectionHeader`, `ArchbaseCard` (com status bar lateral)
+- **forms** — `ArchbaseTextField`, `ArchbasePasswordField`, `ArchbaseButton` (4 variantes + loading), `ArchbaseDropdown.forEnum<E>()`, `ArchbaseSearchField` (com debounce), `ArchbaseNumericStepper`, `ArchbaseCountryPicker`
+- **layout** — `ArchbaseAppBar`, `ArchbaseScaffold` (banner offline embutido), `ArchbaseSectionHeader`, `ArchbaseCard`, `ArchbaseDraggableHome` (header colapsável), `ArchbaseFloatingNavBar`
+- **display** — `ArchbaseTextAvatar` + `ArchbaseAvatarStack`, `ArchbaseGlassContainer` (glass morphism), `ArchbaseCarousel`, `ArchbaseBadgeAdv`
+- **structural** — `ArchbaseAccordion`, `ArchbaseStickyHeader`, `ArchbaseTimeline`, clippers (`Wave`, `Arc`, `Diagonal`, `ClippedHeader`)
 - **dialogs** — `ArchbaseConfirmDialog.show()`, `ArchbaseAlertDialog.show()` (4 severidades), `ArchbaseBottomSheet.show()`, `ArchbaseToast`
-- **media** — `ArchbaseAudioRecorderWidget` (gravar + playback + visualizador), `ArchbaseSignaturePad`, `ArchbasePhotoGallery` (URLs/locais/assets + viewer fullscreen), `ArchbaseBarcodeScanner.open()`, `ArchbaseSwipeToConfirm`
+- **media** — `ArchbaseAudioRecorderWidget`, `ArchbaseSignaturePad`, `ArchbasePhotoGallery`, `ArchbaseBarcodeScanner.open()`, `ArchbaseSwipeToConfirm`
 
 ### `screens/`
 - `ArchbaseLoginScreen` — form com username/password, biometric opcional, dev users, lock por tentativas
@@ -116,6 +118,12 @@ Após o `init`, ficam disponíveis (sem container DI):
 - `ArchbaseCrudFormScreen` — form com validação + confirmação de descarte + delete
 - `ArchbaseDetailScreen` — abas ou seções verticais
 - `ArchbaseSettingsScreen` — tema, fonte, alto contraste, biometria, logout
+- `ArchbaseIntroScreen` — onboarding paginado com indicators
+
+### `forms/` (sistema declarativo)
+- `ArchbaseForm` + `ArchbaseFormController` — agrega valores e erros sem amarrar a state mgmt externo
+- `ArchbaseFormTextField` — TextFormField integrado ao controller via `name:`
+- Campos especializados: `ArchbaseFormCpfField`, `CnpjField`, `CnhField`, `PlateField`, `PhoneBrField`, `EmailField`, `CepField`, `BirthDateField`
 
 ## Exemplo mínimo
 

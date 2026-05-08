@@ -55,6 +55,14 @@ export 'src/utils/debouncer.dart';
 export 'src/utils/jwt_utils.dart';
 export 'src/utils/uuid_utils.dart';
 export 'src/utils/responsive_utils.dart';
+export 'src/utils/extensions/archbase_extensions.dart';
+
+// Forms (sistema declarativo)
+export 'src/forms/archbase_form.dart';
+export 'src/forms/archbase_form_state.dart';
+export 'src/forms/archbase_form_field.dart';
+export 'src/forms/fields/archbase_form_text_field.dart';
+export 'src/forms/fields/archbase_form_specialized_fields.dart';
 
 // Widgets — feedback
 export 'src/widgets/feedback/archbase_loading.dart';
@@ -68,11 +76,25 @@ export 'src/widgets/forms/archbase_password_field.dart';
 export 'src/widgets/forms/archbase_button.dart';
 export 'src/widgets/forms/archbase_dropdown.dart';
 export 'src/widgets/forms/archbase_search_field.dart';
+export 'src/widgets/forms/archbase_numeric_stepper.dart';
+export 'src/widgets/forms/archbase_country_picker.dart';
 // Widgets — layout
 export 'src/widgets/layout/archbase_app_bar.dart';
 export 'src/widgets/layout/archbase_scaffold.dart';
 export 'src/widgets/layout/archbase_section_header.dart';
 export 'src/widgets/layout/archbase_card.dart';
+export 'src/widgets/layout/archbase_draggable_home.dart';
+export 'src/widgets/layout/archbase_floating_nav_bar.dart';
+// Widgets — display
+export 'src/widgets/display/archbase_text_avatar.dart';
+export 'src/widgets/display/archbase_glass_container.dart';
+export 'src/widgets/display/archbase_carousel.dart';
+export 'src/widgets/display/archbase_badges_adv.dart';
+// Widgets — structural
+export 'src/widgets/structural/archbase_accordion.dart';
+export 'src/widgets/structural/archbase_sticky_header.dart';
+export 'src/widgets/structural/archbase_timeline.dart';
+export 'src/widgets/structural/archbase_clippers.dart';
 // Widgets — dialogs
 export 'src/widgets/dialogs/archbase_confirm_dialog.dart';
 export 'src/widgets/dialogs/archbase_alert_dialog.dart';
@@ -91,3 +113,4 @@ export 'src/screens/crud/archbase_crud_list_screen.dart';
 export 'src/screens/crud/archbase_crud_form_screen.dart';
 export 'src/screens/crud/archbase_detail_screen.dart';
 export 'src/screens/settings/archbase_settings_screen.dart';
+export 'src/screens/intro/archbase_intro_screen.dart';
