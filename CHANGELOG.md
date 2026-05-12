@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.4 — Maestro Cloud no CI
+
+### Adicionado
+- Workflow `.github/workflows/maestro-cloud.yml` que constrói o APK do
+  demo e roda os 4 flows Maestro em devices reais via Maestro Cloud.
+- Triggers: `push` para `main` quando `demo/**` muda, e
+  `workflow_dispatch` manual. Workflow separado do CI principal para
+  isolar o custo (Maestro Cloud é pago por minuto).
+- Gate em secret: se `MAESTRO_CLOUD_API_KEY` não estiver configurado,
+  o job termina como "skipped" sem falhar (forks-friendly).
+- Docs no `demo/.maestro/README.md` explicando como gerar a API key e
+  adicionar o secret no GitHub.
+- Badge do workflow no README principal.
+
 ## 0.4.3 — cobertura de media (parcial)
 
 ### Testes

@@ -93,18 +93,29 @@ Cada flow pode tirar screenshots. Adicionar:
 
 Os PNGs ficam em `.maestro/screenshots/`.
 
-## CI
+## CI (Maestro Cloud)
 
-Para rodar em CI (GitHub Actions, GitLab):
+O repositório já tem o workflow `.github/workflows/maestro-cloud.yml`,
+que constrói o APK e roda os 4 flows em devices reais na nuvem.
 
-```yaml
-- uses: mobile-dev-inc/action-maestro-cloud@v1
-  with:
-    api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-    app-file: build/app/outputs/flutter-apk/app-debug.apk
-```
+**Setup (uma vez):**
+1. Criar conta em <https://cloud.mobile.dev/> e gerar uma API key.
+2. No GitHub: `Settings → Secrets and variables → Actions → New
+   repository secret` com nome `MAESTRO_CLOUD_API_KEY`.
+3. Pronto — o workflow roda automaticamente em todo push para `main`
+   que tocar em `demo/**` ou no workflow. Também pode ser rodado
+   manualmente em `Actions → Maestro Cloud → Run workflow`.
 
-Ou, sem cloud, com emulador headless:
+Sem o secret, o job termina como "skipped" sem falhar — útil para
+forks que não querem (ou não podem) usar o serviço pago.
+
+**Custo:** Maestro Cloud é cobrado por minuto de device. Os 4 flows
+rodam em ~5–8 min cada. Veja o pricing atual em
+<https://www.mobile.dev/pricing>.
+
+## CI alternativo (self-hosted, sem custo)
+
+Sem cloud, com emulador headless num runner self-hosted:
 
 ```yaml
 - run: flutter build apk --debug

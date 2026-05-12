@@ -1,0 +1,81 @@
+name: Maestro Cloud
+
+# Maestro Cloud é um serviço pago da mobile.dev — cada run consome créditos.
+# Por isso o workflow só roda:
+#   - em push para main (build oficial de cada release/merge), ou
+#   - manualmente via "Run workflow" (workflow_dispatch).
+#
+# Configuração necessária:
+#   1. Conta em https://cloud.mobile.dev/ e gerar uma API key.
+#   2. No repositório: Settings → Secrets and variables → Actions →
+#      adicionar `MAESTRO_CLOUD_API_KEY` com o valor da key.
+#
+# Sem o secret configurado, o job termina como "skipped" sem erro.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'demo/**'
+      - '.github/workflows/maestro-cloud.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: maestro-cloud-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cloud:
+    name: Maestro Cloud (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check API key
+        id: check
+        env:
+          KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "MAESTRO_CLOUD_API_KEY não configurado — pulando run."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Java
+        if: steps.check.outputs.skip == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter (stable)
+        if: steps.check.outputs.skip == 'false'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Pub get (demo)
+        if: steps.check.outputs.skip == 'false'
+        working-directory: demo
+        run: flutter pub get
+
+      - name: Build APK (debug)
+        if: steps.check.outputs.skip == 'false'
+        working-directory: demo
+        run: flutter build apk --debug
+
+      - name: Run Maestro Cloud
+        if: steps.check.outputs.skip == 'false'
+        uses: mobile-dev-inc/action-maestro-cloud@v1
+        with:
+          api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
+          app-file: demo/build/app/outputs/flutter-apk/app-debug.apk
+          workspace: demo/.maestro
+          name: archbase-demo-${{ github.sha }}
+          # async=false → bloqueia o job até o run terminar e falha o CI
+          # se algum flow falhar (default já é false, mas explícito).
+          async: false

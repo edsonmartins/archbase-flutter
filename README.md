@@ -1,6 +1,7 @@
 # Archbase Flutter
 
 [![CI](https://github.com/edsonmartins/archbase-flutter/actions/workflows/ci.yml/badge.svg)](https://github.com/edsonmartins/archbase-flutter/actions/workflows/ci.yml)
+[![Maestro Cloud](https://github.com/edsonmartins/archbase-flutter/actions/workflows/maestro-cloud.yml/badge.svg)](https://github.com/edsonmartins/archbase-flutter/actions/workflows/maestro-cloud.yml)
 [![Flutter](https://img.shields.io/badge/Flutter-3.22%2B-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -182,9 +183,8 @@ dependencies:
 
 ## Roadmap
 
-- v0.5: testes de widget para 100% dos widgets públicos
 - v0.5: assistant para gerar templates de feature (cli)
-- v0.6: integração com Maestro Cloud no CI
+- v0.6: matriz iOS no Maestro Cloud (hoje só Android)
 
 ## Licença
 
