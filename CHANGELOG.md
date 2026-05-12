@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.3 — cobertura de media (parcial)
+
+### Testes
+- +6 testes para `ArchbaseSwipeToConfirm` (rendering, ícone, cor) e
+  `ArchbaseSignaturePad` (placeholder, labels custom, confirmar vazio)
+- Total: 278 → 284. Gestos de swipe complexos ficam por conta do E2E
+  Maestro (`tester.drag` é frágil quando o GestureDetector se move junto)
+
 ## 0.4.2 — cobertura de screens
 
 ### Testes
