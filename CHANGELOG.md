@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.2 — cobertura de screens
+
+### Testes
+- +29 testes nas screens templates: `ArchbaseIntroScreen`,
+  `ArchbaseDetailScreen` (modo seções + modo abas),
+  `ArchbaseCrudFormScreen` (validate, submit, delete, discard guard),
+  `ArchbaseSettingsScreen` (theme toggle, contraste, logout),
+  `ArchbaseSplashScreen` (bootstrap, onReady, onError, minimumDisplay)
+- Total: 249 → 278 testes. Cobertura de screens públicas em 100%.
+
 ## 0.4.1 — cobertura de testes
 
 ### Testes
