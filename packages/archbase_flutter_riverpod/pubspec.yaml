@@ -1,0 +1,25 @@
+name: archbase_flutter_riverpod
+description: Adapter Riverpod para a archbase_flutter. Providers para os singletons do bootstrap e helpers para integrar Stream/ValueNotifier com state mgmt do Riverpod.
+version: 0.1.0
+publish_to: none
+homepage: https://github.com/edsonmartins/archbase-flutter
+repository: https://github.com/edsonmartins/archbase-flutter
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  archbase_flutter:
+    path: ../..
+  flutter_riverpod: ^2.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

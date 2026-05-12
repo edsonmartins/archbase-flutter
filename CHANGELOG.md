@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.3.0 — state management adapters
+
+Sub-pacotes opcionais em `packages/` para ergonomia em um state mgmt
+específico. A lib mãe continua agnóstica.
+
+### Adicionado
+
+**`archbase_flutter_riverpod`** (`packages/archbase_flutter_riverpod/`)
+- 7 providers para os singletons (`archbaseApiProvider`, etc.)
+- 5 stream providers reativos (`archbaseIsAuthenticatedProvider`,
+  `archbaseCurrentUserProvider`, `archbaseIsConnectedProvider`,
+  `archbaseConnectionTypeProvider`, `archbaseSyncStatusProvider`)
+- `ArchbaseRiverpodNotifier<TState>` — `StateNotifier` com `guard()`
+
+**`archbase_flutter_getx`** (`packages/archbase_flutter_getx/`)
+- `ArchbaseGetBindings` — registra services no Get container
+- `ArchbaseGetController` — `GetxController` base com `guard()`
+  (`RxBool isLoading`, `RxnString error`)
+- Extension `ValueListenable<T>.asRx()` + `BridgedRx<T>` para usar
+  os `ValueNotifier`s da lib com `Obx`
+
+### CI
+- 2 jobs novos: `adapter-riverpod`, `adapter-getx` (paralelos ao demo)
+
 ## 0.2.0 — anteros migration
 
 Portagem de componentes selecionados da `anterosflutter` (lib antiga). Tudo

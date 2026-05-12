@@ -58,6 +58,50 @@ jobs:
           path: coverage/lcov.info
           retention-days: 14
 
+  adapter-riverpod:
+    name: archbase_flutter_riverpod
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lib
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Pub get
+        working-directory: packages/archbase_flutter_riverpod
+        run: flutter pub get
+      - name: Analyze
+        working-directory: packages/archbase_flutter_riverpod
+        run: flutter analyze
+      - name: Test
+        working-directory: packages/archbase_flutter_riverpod
+        run: flutter test
+
+  adapter-getx:
+    name: archbase_flutter_getx
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lib
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Pub get
+        working-directory: packages/archbase_flutter_getx
+        run: flutter pub get
+      - name: Analyze
+        working-directory: packages/archbase_flutter_getx
+        run: flutter analyze
+      - name: Test
+        working-directory: packages/archbase_flutter_getx
+        run: flutter test
+
   demo:
     name: archbase_demo (analyze + smoke)
     runs-on: ubuntu-latest

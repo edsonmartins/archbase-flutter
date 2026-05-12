@@ -153,12 +153,31 @@ maestro test demo/.maestro/
 
 Detalhes: [`demo/README.md`](demo/README.md) e [`demo/.maestro/README.md`](demo/.maestro/README.md).
 
+## Adapters opcionais (state management)
+
+A lib mãe é **agnóstica** de state management. Para quem quer
+ergonomia adicional num framework específico:
+
+| Pacote | O que provê |
+|---|---|
+| [`archbase_flutter_riverpod`](packages/archbase_flutter_riverpod/) | Providers globais para os singletons, Stream providers reativos para `ValueNotifier`s da lib, e `ArchbaseRiverpodNotifier<TState>` com `guard()` |
+| [`archbase_flutter_getx`](packages/archbase_flutter_getx/) | `ArchbaseGetBindings` para registrar services no Get, `ArchbaseGetController` base com `guard()` e extension `ValueListenable<T>.asRx()` para usar com `Obx` |
+
+```yaml
+# Só inclua o que escolher (são alternativos, não complementares)
+dependencies:
+  archbase_flutter_riverpod:
+    path: ../archbase-flutter/packages/archbase_flutter_riverpod
+  # OU
+  archbase_flutter_getx:
+    path: ../archbase-flutter/packages/archbase_flutter_getx
+```
+
 ## Roadmap
 
-- v0.2: helpers para Riverpod e GetX (adapters opcionais)
-- v0.2: gráficos prontos (`ArchbaseLineChart`, `ArchbasePieChart`)
-- v0.3: i18n com fallback automático para pt-BR
-- v0.3: testes de widget para todos os widgets públicos
+- v0.4: gráficos prontos (`ArchbaseLineChart`, `ArchbasePieChart`)
+- v0.4: i18n com fallback automático para pt-BR
+- v0.5: testes de widget para todos os widgets públicos
 
 ## Licença
 
