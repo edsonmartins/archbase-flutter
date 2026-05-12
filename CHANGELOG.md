@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1 — cobertura de testes
+
+### Testes
+- +47 testes (dialogs, display, shimmer, dropdown, search, country
+  picker, layout, sticky header, clippers) → 249 totais
+- Cobertura de widgets públicos sobe para ~85% (ainda faltam apenas
+  os widgets que dependem de plugins nativos — media/scanner/audio)
+
 ## 0.4.0 — charts + i18n
 
 ### Adicionado
