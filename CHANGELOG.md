@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.0 — charts + i18n
+
+### Adicionado
+
+**Charts** (wrappers opinados sobre `fl_chart`)
+- `ArchbaseLineChart` — múltiplas séries, eixos auto, tooltip, legend
+- `ArchbasePieChart` — slices nomeados, donut com center text, animação
+- `ArchbaseBarChart` — barras agrupadas com labels de eixo X
+- `ArchbaseAreaChart` — line com fill
+- Compartilham `ArchbaseChartSeries`, `ArchbaseChartPoint`, `ArchbaseChartSlice` e `ArchbaseChartLegend`
+- Cores automáticas da `ArchbaseColors.chartPalette` quando não informadas
+
+**i18n**
+- `ArchbaseLocalizations` (abstract) — bundle com todos os strings da lib (~80 chaves: validators, botões, dialogs, erros HTTP, login, settings, sync banner)
+- `ArchbaseLocalizationsPtBr` — implementação default
+- `ArchbaseLocalizationsEnUs` — implementação de referência
+- `ArchbaseLocalizations.set(...)` para override global
+- `ArchbaseLocalizationsScope` (InheritedWidget) para override por subárvore
+- `ArchbaseLocalizations.of(context)` resolve scope → global
+- Validators e `ArchbaseErrorInterceptor` agora consultam o bundle ativo
+
+### Testes
+- +16 testes (charts + i18n) → 202 totais
+
 ## 0.3.0 — state management adapters
 
 Sub-pacotes opcionais em `packages/` para ergonomia em um state mgmt

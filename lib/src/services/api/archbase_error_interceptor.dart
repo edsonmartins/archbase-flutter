@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../core/exceptions/api_exception.dart';
+import '../../i18n/archbase_localizations.dart';
 
 /// Converte [DioException] em [ApiException] padronizada.
 class ArchbaseErrorInterceptor extends Interceptor {
@@ -62,36 +63,37 @@ class ArchbaseErrorInterceptor extends Interceptor {
   }
 
   String _defaultFor(int? status, DioExceptionType type) {
+    final l = ArchbaseLocalizations.current;
     if (type == DioExceptionType.connectionTimeout ||
         type == DioExceptionType.sendTimeout ||
         type == DioExceptionType.receiveTimeout) {
-      return 'Tempo de conexão esgotado. Tente novamente.';
+      return l.errorTimeout;
     }
     if (type == DioExceptionType.connectionError) {
-      return 'Sem conexão com o servidor. Verifique sua internet.';
+      return l.errorConnection;
     }
     if (type == DioExceptionType.cancel) {
-      return 'Requisição cancelada.';
+      return l.errorCancelled;
     }
     switch (status) {
       case 400:
-        return 'Requisição inválida.';
+        return l.errorBadRequest;
       case 401:
-        return 'Sessão expirada. Faça login novamente.';
+        return l.errorUnauthorized;
       case 403:
-        return 'Você não tem permissão para esta ação.';
+        return l.errorForbidden;
       case 404:
-        return 'Recurso não encontrado.';
+        return l.errorNotFound;
       case 409:
-        return 'Conflito com o estado atual do recurso.';
+        return l.errorConflict;
       case 422:
-        return 'Dados inválidos.';
+        return l.errorValidation;
       case 500:
       case 502:
       case 503:
-        return 'Falha no servidor. Tente novamente em instantes.';
+        return l.errorServer;
       default:
-        return 'Falha na operação${status != null ? ' (HTTP $status)' : ''}.';
+        return l.errorGeneric(status);
     }
   }
 }

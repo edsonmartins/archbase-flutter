@@ -1,12 +1,16 @@
 import 'package:cpf_cnpj_validator/cnpj_validator.dart';
 import 'package:cpf_cnpj_validator/cpf_validator.dart';
 
+import '../../i18n/archbase_localizations.dart';
+
 /// Conjunto de validadores brasileiros prontos para uso em `TextFormField`.
 ///
 /// Todos retornam `null` quando o valor é válido, ou a mensagem de erro
-/// (em pt-BR) quando inválido — formato esperado por `validator:`.
+/// (em pt-BR por padrão; pode ser sobrescrita via [ArchbaseLocalizations]).
 class ArchbaseValidators {
   ArchbaseValidators._();
+
+  static ArchbaseLocalizations get _l => ArchbaseLocalizations.current;
 
   static final RegExp _emailRe = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
@@ -16,74 +20,77 @@ class ArchbaseValidators {
     r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$&*~_\-+%^.,;:?<>\(\)\[\]\{\}|/\\]).{8,}$',
   );
 
-  static String? required(
-    String? value, {
-    String message = 'Campo obrigatório',
-  }) {
-    if (value == null || value.trim().isEmpty) return message;
+  static String? required(String? value, {String? message}) {
+    if (value == null || value.trim().isEmpty) {
+      return message ?? _l.fieldRequired;
+    }
     return null;
   }
 
   static String? minLength(String? value, int min, {String? message}) {
     if (value == null || value.length < min) {
-      return message ?? 'Mínimo de $min caracteres';
+      return message ?? _l.minLengthMessage(min);
     }
     return null;
   }
 
   static String? maxLength(String? value, int max, {String? message}) {
     if (value != null && value.length > max) {
-      return message ?? 'Máximo de $max caracteres';
+      return message ?? _l.maxLengthMessage(max);
     }
     return null;
   }
 
   static String? email(
     String? value, {
-    String message = 'E-mail inválido',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
-    if (!_emailRe.hasMatch(value.trim())) return message;
+    final m = message ?? _l.emailInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
+    if (!_emailRe.hasMatch(value.trim())) return m;
     return null;
   }
 
   static String? cpf(
     String? value, {
-    String message = 'CPF inválido',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
-    return CPFValidator.isValid(value) ? null : message;
+    final m = message ?? _l.cpfInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
+    return CPFValidator.isValid(value) ? null : m;
   }
 
   static String? cnpj(
     String? value, {
-    String message = 'CNPJ inválido',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
-    return CNPJValidator.isValid(value) ? null : message;
+    final m = message ?? _l.cnpjInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
+    return CNPJValidator.isValid(value) ? null : m;
   }
 
   static String? cpfOrCnpj(String? value, {bool allowEmpty = false}) {
     if (value == null || value.isEmpty) {
-      return allowEmpty ? null : 'CPF/CNPJ obrigatório';
+      return allowEmpty ? null : _l.cpfOrCnpjRequired;
     }
     final digits = value.replaceAll(RegExp(r'\D'), '');
     if (digits.length == 11) return cpf(value);
     if (digits.length == 14) return cnpj(value);
-    return 'CPF/CNPJ inválido';
+    return _l.cpfOrCnpjInvalid;
   }
 
   static String? phoneBr(
     String? value, {
-    String message = 'Telefone inválido',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
+    final m = message ?? _l.phoneBrInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
     final digits = value.replaceAll(RegExp(r'\D'), '');
-    if (digits.length < 10 || digits.length > 11) return message;
+    if (digits.length < 10 || digits.length > 11) return m;
     return null;
   }
 
@@ -91,13 +98,14 @@ class ArchbaseValidators {
   /// com algoritmo de verificação dos 2 últimos.
   static String? cnh(
     String? value, {
-    String message = 'CNH inválida',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
+    final m = message ?? _l.cnhInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
     final digits = value.replaceAll(RegExp(r'\D'), '');
-    if (digits.length != 11) return message;
-    if (RegExp(r'^(\d)\1{10}$').hasMatch(digits)) return message;
+    if (digits.length != 11) return m;
+    if (RegExp(r'^(\d)\1{10}$').hasMatch(digits)) return m;
 
     int dsc = 0;
     int v = 0;
@@ -117,7 +125,7 @@ class ArchbaseValidators {
     if (dv2 < 0) dv2 += 11;
     if (dv2 >= 10) dv2 = 0;
     if (dv1 != int.parse(digits[9]) || dv2 != int.parse(digits[10])) {
-      return message;
+      return m;
     }
     return null;
   }
@@ -126,23 +134,21 @@ class ArchbaseValidators {
   /// Mercosul `AAA9A99`.
   static String? plateBr(
     String? value, {
-    String message = 'Placa inválida',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
+    final m = message ?? _l.plateInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
     final cleaned = value.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
     final mercosul = RegExp(r'^[A-Z]{3}\d[A-Z]\d{2}$');
     final antiga = RegExp(r'^[A-Z]{3}\d{4}$');
     if (mercosul.hasMatch(cleaned) || antiga.hasMatch(cleaned)) return null;
-    return message;
+    return m;
   }
 
   /// Valida idade mínima a partir de uma data de nascimento (DateTime
   /// ou ISO string).
-  static String? Function(String?) ageMin(
-    int minYears, {
-    String message = 'Idade mínima não atingida',
-  }) {
+  static String? Function(String?) ageMin(int minYears, {String? message}) {
     return (value) {
       if (value == null || value.isEmpty) return null;
       DateTime? birth;
@@ -159,14 +165,14 @@ class ArchbaseValidators {
         }
       }
       birth ??= DateTime.tryParse(value);
-      if (birth == null) return 'Data inválida';
+      if (birth == null) return _l.dateInvalid;
       final now = DateTime.now();
       var age = now.year - birth.year;
       if (now.month < birth.month ||
           (now.month == birth.month && now.day < birth.day)) {
         age--;
       }
-      if (age < minYears) return message;
+      if (age < minYears) return message ?? _l.minAgeMessage(minYears);
       return null;
     };
   }
@@ -174,41 +180,51 @@ class ArchbaseValidators {
   /// URL HTTP/HTTPS válida.
   static String? url(
     String? value, {
-    String message = 'URL inválida',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
+    final m = message ?? _l.urlInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
     final uri = Uri.tryParse(value.trim());
-    if (uri == null || !uri.isAbsolute) return message;
-    if (!{'http', 'https'}.contains(uri.scheme)) return message;
+    if (uri == null || !uri.isAbsolute) return m;
+    if (!{'http', 'https'}.contains(uri.scheme)) return m;
+    return null;
+  }
+
+  /// Senha forte: 8+ caracteres, maiúscula, minúscula, número e símbolo.
+  static String? strongPassword(
+    String? value, {
+    int minLength = 8,
+    String? message,
+  }) {
+    final m = message ?? _l.strongPasswordMessage;
+    if (value == null || value.length < minLength) return m;
+    return _strongPwd.hasMatch(value) ? null : m;
+  }
+
+  static String? confirm(String? value, String? other, {String? message}) {
+    if (value != other) return message ?? _l.valuesMismatch;
     return null;
   }
 
   /// Igualdade entre dois valores — útil para "campo X igual a Y".
-  static String? Function(String?) equal(
-    Object? other, {
-    String message = 'Valores não coincidem',
-  }) {
-    return (value) => value == other?.toString() ? null : message;
+  static String? Function(String?) equal(Object? other, {String? message}) {
+    return (value) =>
+        value == other?.toString() ? null : (message ?? _l.valuesMismatch);
   }
 
   /// Diferença entre dois valores.
-  static String? Function(String?) notEqual(
-    Object? other, {
-    String message = 'Valor não pode ser igual',
-  }) {
-    return (value) => value != other?.toString() ? null : message;
+  static String? Function(String?) notEqual(Object? other, {String? message}) {
+    return (value) =>
+        value != other?.toString() ? null : (message ?? _l.valuesMustDiffer);
   }
 
   /// Casamento por padrão regex.
-  static String? Function(String?) pattern(
-    Pattern pattern, {
-    String message = 'Formato inválido',
-  }) {
+  static String? Function(String?) pattern(Pattern pattern, {String? message}) {
     return (value) {
       if (value == null || value.isEmpty) return null;
       final re = pattern is RegExp ? pattern : RegExp(pattern.toString());
-      return re.hasMatch(value) ? null : message;
+      return re.hasMatch(value) ? null : (message ?? _l.formatInvalid);
     };
   }
 
@@ -221,9 +237,9 @@ class ArchbaseValidators {
     return (value) {
       if (value == null || value.isEmpty) return null;
       final n = num.tryParse(value.replaceAll(',', '.'));
-      if (n == null) return message ?? 'Número inválido';
+      if (n == null) return message ?? _l.numberInvalid;
       if (n < min || n > max) {
-        return message ?? 'Valor deve estar entre $min e $max';
+        return message ?? _l.numericBetweenMessage(min, max);
       }
       return null;
     };
@@ -232,12 +248,13 @@ class ArchbaseValidators {
   /// Cartão de crédito (Luhn check).
   static String? creditCard(
     String? value, {
-    String message = 'Número de cartão inválido',
+    String? message,
     bool allowEmpty = false,
   }) {
-    if (value == null || value.isEmpty) return allowEmpty ? null : message;
+    final m = message ?? _l.cardInvalid;
+    if (value == null || value.isEmpty) return allowEmpty ? null : m;
     final digits = value.replaceAll(RegExp(r'\D'), '');
-    if (digits.length < 13 || digits.length > 19) return message;
+    if (digits.length < 13 || digits.length > 19) return m;
     int sum = 0;
     bool alt = false;
     for (int i = digits.length - 1; i >= 0; i--) {
@@ -249,28 +266,7 @@ class ArchbaseValidators {
       sum += n;
       alt = !alt;
     }
-    return sum % 10 == 0 ? null : message;
-  }
-
-  /// Senha forte (default Archbase): 8+ caracteres, maiúscula, minúscula,
-  /// número e um caractere especial.
-  static String? strongPassword(
-    String? value, {
-    int minLength = 8,
-    String message =
-        'Senha precisa ter 8+ caracteres, com maiúscula, minúscula, número e símbolo',
-  }) {
-    if (value == null || value.length < minLength) return message;
-    return _strongPwd.hasMatch(value) ? null : message;
-  }
-
-  static String? confirm(
-    String? value,
-    String? other, {
-    String message = 'Os valores não coincidem',
-  }) {
-    if (value != other) return message;
-    return null;
+    return sum % 10 == 0 ? null : m;
   }
 
   /// Compose: roda múltiplos validadores em sequência, devolvendo o primeiro erro.

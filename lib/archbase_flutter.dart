@@ -57,6 +57,10 @@ export 'src/utils/uuid_utils.dart';
 export 'src/utils/responsive_utils.dart';
 export 'src/utils/extensions/archbase_extensions.dart';
 
+// i18n
+export 'src/i18n/archbase_localizations.dart';
+export 'src/i18n/archbase_localizations_en_us.dart';
+
 // Forms (sistema declarativo)
 export 'src/forms/archbase_form.dart';
 export 'src/forms/archbase_form_state.dart';
@@ -95,6 +99,13 @@ export 'src/widgets/structural/archbase_accordion.dart';
 export 'src/widgets/structural/archbase_sticky_header.dart';
 export 'src/widgets/structural/archbase_timeline.dart';
 export 'src/widgets/structural/archbase_clippers.dart';
+// Widgets — charts
+export 'src/widgets/charts/archbase_chart_data.dart';
+export 'src/widgets/charts/archbase_chart_legend.dart';
+export 'src/widgets/charts/archbase_line_chart.dart';
+export 'src/widgets/charts/archbase_pie_chart.dart';
+export 'src/widgets/charts/archbase_bar_chart.dart';
+export 'src/widgets/charts/archbase_area_chart.dart';
 // Widgets — dialogs
 export 'src/widgets/dialogs/archbase_confirm_dialog.dart';
 export 'src/widgets/dialogs/archbase_alert_dialog.dart';

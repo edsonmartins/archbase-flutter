@@ -95,6 +95,12 @@ Após o `init`, ficam disponíveis (sem container DI):
 - `ArchbaseThemeController` — toggle system/light/dark + acessibilidade, persistido
 - Extension `context.archbase` / `context.archbaseColors` / `context.isDarkMode`
 
+### `i18n/`
+- `ArchbaseLocalizations` (abstract) — bundle com todos os strings da lib
+- `ArchbaseLocalizationsPtBr` (default), `ArchbaseLocalizationsEnUs` (exemplo)
+- `ArchbaseLocalizations.set(...)` para override global ou `ArchbaseLocalizationsScope` para subárvore
+- Validators e `ArchbaseErrorInterceptor` leem do bundle ativo
+
 ### `utils/`
 - `ArchbaseValidators` — `required`, `email`, `cpf`, `cnpj`, `cpfOrCnpj`, `phoneBr`, `strongPassword`, `confirm`, `compose`
 - `ArchbaseDateFormatter` — `date`, `dateTime`, `time`, `relative` ("Hoje", "Ontem", "Há N dias"), `duration`
@@ -108,6 +114,7 @@ Após o `init`, ficam disponíveis (sem container DI):
 - **layout** — `ArchbaseAppBar`, `ArchbaseScaffold` (banner offline embutido), `ArchbaseSectionHeader`, `ArchbaseCard`, `ArchbaseDraggableHome` (header colapsável), `ArchbaseFloatingNavBar`
 - **display** — `ArchbaseTextAvatar` + `ArchbaseAvatarStack`, `ArchbaseGlassContainer` (glass morphism), `ArchbaseCarousel`, `ArchbaseBadgeAdv`
 - **structural** — `ArchbaseAccordion`, `ArchbaseStickyHeader`, `ArchbaseTimeline`, clippers (`Wave`, `Arc`, `Diagonal`, `ClippedHeader`)
+- **charts** — `ArchbaseLineChart`, `ArchbasePieChart` (donut), `ArchbaseBarChart`, `ArchbaseAreaChart` (wrappers sobre `fl_chart` com cores da paleta do tema)
 - **dialogs** — `ArchbaseConfirmDialog.show()`, `ArchbaseAlertDialog.show()` (4 severidades), `ArchbaseBottomSheet.show()`, `ArchbaseToast`
 - **media** — `ArchbaseAudioRecorderWidget`, `ArchbaseSignaturePad`, `ArchbasePhotoGallery`, `ArchbaseBarcodeScanner.open()`, `ArchbaseSwipeToConfirm`
 
@@ -175,9 +182,9 @@ dependencies:
 
 ## Roadmap
 
-- v0.4: gráficos prontos (`ArchbaseLineChart`, `ArchbasePieChart`)
-- v0.4: i18n com fallback automático para pt-BR
-- v0.5: testes de widget para todos os widgets públicos
+- v0.5: testes de widget para 100% dos widgets públicos
+- v0.5: assistant para gerar templates de feature (cli)
+- v0.6: integração com Maestro Cloud no CI
 
 ## Licença
 
