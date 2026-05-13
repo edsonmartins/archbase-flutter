@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0 — CLI generator
+
+### Adicionado
+- CLI Dart `archbase` (`bin/archbase.dart`), exposto via `executables:`
+  e invocável por `dart run archbase_flutter:archbase`
+- Comando `feature <nome>`: gera scaffold completo de uma feature CRUD
+  (model + repository + controller + 3 telas), com nomes derivados em
+  snake/Pascal/camel/human automaticamente
+- Helpers `Casing` (snake, kebab, camel, pascal, human) reutilizáveis
+- Suporte a `--root`, `--endpoint`, `--force`
+
+### Dependências
+- `args: ^2.5.0` (parser do CLI)
+- `path: ^1.9.0` (manipulação de paths)
+
+### Testes
+- +12 testes (Casing + FeatureScaffold em diretório temp) → 296 totais
+
 ## 0.4.4 — Maestro Cloud no CI
 
 ### Adicionado

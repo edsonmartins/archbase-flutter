@@ -181,10 +181,37 @@ dependencies:
     path: ../archbase-flutter/packages/archbase_flutter_getx
 ```
 
+## CLI — gerador de features
+
+A lib expõe um CLI Dart (`archbase`) que cria todo o esqueleto de uma
+feature CRUD seguindo as convenções do framework:
+
+```bash
+# dentro do app que depende de archbase_flutter
+dart run archbase_flutter:archbase feature visita
+```
+
+Gera em `lib/features/visita/`:
+- `models/visita.dart` — DTO + LabeledEnum de status
+- `visita_repository.dart` — wrapper do `ArchbaseApiClient`
+- `visita_controller.dart` — `ArchbaseController<VisitaState>` com
+  `loadFirstPage`, `loadNextPage`, `save`, `remove`
+- `visita_list_page.dart` — `ArchbaseCrudListScreen`
+- `visita_form_page.dart` — `ArchbaseCrudFormScreen`
+- `visita_detail_page.dart` — `ArchbaseDetailScreen`
+
+Opções:
+- `--root` (default `lib`): pasta raiz do app.
+- `--endpoint` (default `/<snake>s`): rota REST.
+- `--force`: sobrescreve arquivos existentes.
+
+O nome aceita kebab / snake / camel / Pascal — o gerador normaliza para
+o casing certo em cada arquivo.
+
 ## Roadmap
 
-- v0.5: assistant para gerar templates de feature (cli)
 - v0.6: matriz iOS no Maestro Cloud (hoje só Android)
+- v0.6: bricks Mason equivalentes ao CLI Dart (interativo)
 
 ## Licença
 
