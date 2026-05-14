@@ -1,6 +1,6 @@
 # Fluxo: modo offline — desliga rede simulada, cria visita,
 # vê sync banner, religa rede, valida sync.
-appId: com.archbase.archbase_demo
+appId: ${APP_ID}
 name: 03 — Offline + sync
 tags:
   - offline

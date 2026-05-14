@@ -1,7 +1,7 @@
 # Fluxo: CRUD de visitas — criar, ver na lista, editar, excluir.
 #
 # Assume sessão ativa (rodar APÓS 01_login.yaml ou usar runFlow inline).
-appId: com.archbase.archbase_demo
+appId: ${APP_ID}
 name: 02 — CRUD de visitas
 tags:
   - crud

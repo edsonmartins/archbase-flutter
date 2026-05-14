@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.5.1 — iOS no Maestro Cloud
+
+### Adicionado
+- Job `cloud-ios` em `.github/workflows/maestro-cloud.yml`, rodando
+  em `macos-latest`: build do `.app` para iOS Simulator (sem
+  assinatura), zip e upload via `action-maestro-cloud`
+- Os 4 flows agora usam `appId: ${APP_ID}` para servir Android e iOS
+  (bundle id difere — iOS não permite `_`)
+- Job Android antigo renomeado para `cloud-android` (clareza)
+- Cada job passa o `APP_ID` certo via `env:` no action
+
+### Mudou
+- `demo/.maestro/config.yaml` e os 4 flows: `appId` parametrizado
+- `demo/.maestro/README.md`: documenta `export APP_ID=...` para
+  rodar localmente
+
+### Roadmap restante
+- Bricks Mason equivalentes ao CLI Dart (interativo) — opcional
+
 ## 0.5.0 — CLI generator
 
 ### Adicionado

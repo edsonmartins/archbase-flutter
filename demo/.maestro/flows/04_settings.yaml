@@ -1,5 +1,5 @@
 # Fluxo: settings — tema, fonte, alto contraste, logout.
-appId: com.archbase.archbase_demo
+appId: ${APP_ID}
 name: 04 — Settings
 tags:
   - settings

@@ -1,7 +1,7 @@
 # Fluxo: login — exercita validação, erro e sucesso.
 #
 # Pré-requisito: app instalado mas SEM sessão (clearState ao começar).
-appId: com.archbase.archbase_demo
+appId: ${APP_ID}
 name: 01 — Login
 tags:
   - login

@@ -210,8 +210,7 @@ o casing certo em cada arquivo.
 
 ## Roadmap
 
-- v0.6: matriz iOS no Maestro Cloud (hoje só Android)
-- v0.6: bricks Mason equivalentes ao CLI Dart (interativo)
+- v0.6: bricks Mason equivalentes ao CLI Dart (interativo) — opcional
 
 ## Licença
 

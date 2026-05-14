@@ -1,10 +1,16 @@
 # Configuração compartilhada pelos flows Maestro do demo.
 #
-# `appId` deve casar com o applicationId/CFBundleIdentifier do app —
-# definido no flutter create com --org com.archbase.
+# `appId` é parametrizado por env var porque o bundle id difere entre
+# Android (com.archbase.archbase_demo, com underscore) e iOS
+# (com.archbase.archbaseDemo, sem underscore — iOS não permite `_`).
 #
-# Use `executionOrder` para garantir que o login rode antes dos demais.
-appId: com.archbase.archbase_demo
+# Definir antes de rodar localmente:
+#   export APP_ID=com.archbase.archbase_demo  # Android
+#   export APP_ID=com.archbase.archbaseDemo   # iOS
+#
+# Em CI, o workflow .github/workflows/maestro-cloud.yml passa o valor
+# certo por plataforma via `env: APP_ID=...` no action-maestro-cloud.
+appId: ${APP_ID}
 
 # Flutter envolve toda a árvore num FlutterView. O Maestro usa engine de
 # acessibilidade nativa, então identificadores baseados em ValueKey

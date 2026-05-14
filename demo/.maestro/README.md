@@ -32,6 +32,14 @@ maestro --version
 
 ## Executar os flows
 
+> **APP_ID obrigatório:** os flows usam `appId: ${APP_ID}` para
+> servir Android e iOS (que têm bundle ids diferentes). Defina antes:
+>
+> ```bash
+> export APP_ID=com.archbase.archbase_demo  # Android
+> export APP_ID=com.archbase.archbaseDemo   # iOS (sem underscore)
+> ```
+
 ```bash
 # todos os flows na ordem (config.yaml define a sequência)
 cd demo/.maestro

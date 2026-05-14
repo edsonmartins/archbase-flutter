@@ -10,7 +10,11 @@ name: Maestro Cloud
 #   2. No repositório: Settings → Secrets and variables → Actions →
 #      adicionar `MAESTRO_CLOUD_API_KEY` com o valor da key.
 #
-# Sem o secret configurado, o job termina como "skipped" sem erro.
+# Sem o secret configurado, os jobs terminam como "skipped" sem erro.
+#
+# Os flows usam `appId: ${APP_ID}` para servir tanto Android quanto
+# iOS — cada job passa o bundle id correto via `env:` no
+# action-maestro-cloud.
 
 on:
   push:
@@ -25,7 +29,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cloud:
+  cloud-android:
     name: Maestro Cloud (Android)
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -68,14 +72,69 @@ jobs:
         working-directory: demo
         run: flutter build apk --debug
 
-      - name: Run Maestro Cloud
+      - name: Run Maestro Cloud (Android)
         if: steps.check.outputs.skip == 'false'
         uses: mobile-dev-inc/action-maestro-cloud@v1
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
           app-file: demo/build/app/outputs/flutter-apk/app-debug.apk
           workspace: demo/.maestro
-          name: archbase-demo-${{ github.sha }}
-          # async=false → bloqueia o job até o run terminar e falha o CI
-          # se algum flow falhar (default já é false, mas explícito).
+          name: archbase-demo-android-${{ github.sha }}
+          env: |
+            APP_ID=com.archbase.archbase_demo
+          async: false
+
+  cloud-ios:
+    name: Maestro Cloud (iOS Simulator)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check API key
+        id: check
+        env:
+          KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "MAESTRO_CLOUD_API_KEY não configurado — pulando run."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Flutter (stable)
+        if: steps.check.outputs.skip == 'false'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Pub get (demo)
+        if: steps.check.outputs.skip == 'false'
+        working-directory: demo
+        run: flutter pub get
+
+      # `--simulator` produz um .app sem assinar, ideal pra Maestro
+      # Cloud (eles bootam num iOS Simulator, não em device real).
+      - name: Build iOS .app (simulator, unsigned)
+        if: steps.check.outputs.skip == 'false'
+        working-directory: demo
+        run: flutter build ios --simulator --debug
+
+      - name: Zip .app bundle
+        if: steps.check.outputs.skip == 'false'
+        working-directory: demo/build/ios/iphonesimulator
+        run: zip -r ../../../Runner.app.zip Runner.app
+
+      - name: Run Maestro Cloud (iOS)
+        if: steps.check.outputs.skip == 'false'
+        uses: mobile-dev-inc/action-maestro-cloud@v1
+        with:
+          api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
+          app-file: demo/Runner.app.zip
+          workspace: demo/.maestro
+          name: archbase-demo-ios-${{ github.sha }}
+          env: |
+            APP_ID=com.archbase.archbaseDemo
           async: false
