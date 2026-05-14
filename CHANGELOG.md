@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.2 — metadata para pub.dev
+
+### Mudou
+- `pubspec.yaml`: description trimada para 180 chars (limite recomendado
+  pelo pana), adicionados `issue_tracker`, `documentation` e `topics`
+  (`framework`, `ui`, `offline`, `material-design`, `scaffolding`)
+
+### Adicionado
+- Site oficial de documentação em
+  https://edsonmartins.github.io/archbase-flutter/ (Docusaurus 3 +
+  pt-BR/en, repo: `archbase-flutter-docs`)
+
 ## 0.5.1 — iOS no Maestro Cloud
 
 ### Adicionado
