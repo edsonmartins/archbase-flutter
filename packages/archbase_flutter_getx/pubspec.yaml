@@ -1,9 +1,16 @@
 name: archbase_flutter_getx
-description: Adapter GetX para a archbase_flutter. Bindings para registrar os singletons do bootstrap no Get e um GetxController base com guard() de loading/erro.
-version: 0.1.0
-publish_to: none
+description: Adapter GetX para archbase_flutter — bindings para registrar singletons no Get container, ArchbaseGetController base com guard() e bridge ValueNotifier→Rx.
+version: 0.2.0
 homepage: https://github.com/edsonmartins/archbase-flutter
-repository: https://github.com/edsonmartins/archbase-flutter
+repository: https://github.com/edsonmartins/archbase-flutter/tree/main/packages/archbase_flutter_getx
+issue_tracker: https://github.com/edsonmartins/archbase-flutter/issues
+documentation: https://edsonmartins.github.io/archbase-flutter/docs/adapters/getx
+
+topics:
+  - getx
+  - state-management
+  - framework
+  - bindings
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
@@ -12,14 +19,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  archbase_flutter:
-    path: ../..
+  archbase_flutter: ^0.5.2
   get: ^4.6.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+
+# Override só para desenvolvimento local — ignorado pelo pub.dev publish.
+# Permite rodar testes do adapter contra a versão local da archbase_flutter.
+dependency_overrides:
+  archbase_flutter:
+    path: ../..
 
 flutter:
   uses-material-design: true
