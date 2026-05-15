@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.3 — corrige URL de docs
+
+### Mudou
+- `documentation:` no pubspec aponta para o URL real do site
+  (`/archbase-flutter-docs/` — o repo de docs é separado da lib)
+- Adapters (`_riverpod`, `_getx`) também atualizados — agora dependem
+  de `archbase_flutter: ^0.5.3` e o documentation URL correto
+
 ## 0.5.2 — metadata para pub.dev
 
 ### Mudou
@@ -9,7 +17,7 @@
 
 ### Adicionado
 - Site oficial de documentação em
-  https://edsonmartins.github.io/archbase-flutter/ (Docusaurus 3 +
+  https://edsonmartins.github.io/archbase-flutter-docs/ (Docusaurus 3 +
   pt-BR/en, repo: `archbase-flutter-docs`)
 
 ## 0.5.1 — iOS no Maestro Cloud

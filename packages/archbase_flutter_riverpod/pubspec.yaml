@@ -4,7 +4,7 @@ version: 0.2.0
 homepage: https://github.com/edsonmartins/archbase-flutter
 repository: https://github.com/edsonmartins/archbase-flutter/tree/main/packages/archbase_flutter_riverpod
 issue_tracker: https://github.com/edsonmartins/archbase-flutter/issues
-documentation: https://edsonmartins.github.io/archbase-flutter/docs/adapters/riverpod
+documentation: https://edsonmartins.github.io/archbase-flutter-docs/docs/adapters/riverpod
 
 topics:
   - riverpod
@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  archbase_flutter: ^0.5.2
+  archbase_flutter: ^0.5.3
   flutter_riverpod: ^2.5.1
 
 dev_dependencies:

@@ -1,10 +1,10 @@
 name: archbase_flutter
 description: Framework Flutter empresarial — services (API, auth, cache offline-first), widgets Material 3, templates de tela CRUD, validadores brasileiros (CPF/CNPJ) e CLI generator.
-version: 0.5.2
+version: 0.5.3
 homepage: https://github.com/edsonmartins/archbase-flutter
 repository: https://github.com/edsonmartins/archbase-flutter
 issue_tracker: https://github.com/edsonmartins/archbase-flutter/issues
-documentation: https://edsonmartins.github.io/archbase-flutter/
+documentation: https://edsonmartins.github.io/archbase-flutter-docs/
 
 topics:
   - framework
