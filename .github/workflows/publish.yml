@@ -1,0 +1,222 @@
+name: Publish to pub.dev
+
+# Publica automaticamente no pub.dev e cria um GitHub Release quando uma
+# tag é empurrada. Usa OIDC (id-token) — nenhum secret necessário, mas
+# requer configurar "Automated publishing" no admin de cada pacote no
+# pub.dev. Ver RELEASING.md.
+#
+# Padrões de tag:
+#   v{x.y.z}                                  → archbase_flutter
+#   archbase_flutter_riverpod-v{x.y.z}        → adapter riverpod
+#   archbase_flutter_getx-v{x.y.z}            → adapter getx
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - 'archbase_flutter_riverpod-v[0-9]+.[0-9]+.[0-9]+*'
+      - 'archbase_flutter_getx-v[0-9]+.[0-9]+.[0-9]+*'
+
+# Permissões mínimas:
+# - id-token:write é o que dispara o OIDC pro pub.dev
+# - contents:write é necessário pra criar/editar Releases via gh CLI
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  # -------------------------------------------------------------------------
+  # archbase_flutter (lib principal) — disparado por tag `vX.Y.Z`
+  # -------------------------------------------------------------------------
+  publish-main:
+    name: Publish archbase_flutter
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Verify version casa com a tag
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          PUB_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          if [ "$TAG_VERSION" != "$PUB_VERSION" ]; then
+            echo "::error::Tag v$TAG_VERSION não bate com pubspec ($PUB_VERSION). Bumpa o pubspec antes de tagear."
+            exit 1
+          fi
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+        id: ver
+
+      - name: Publish on pub.dev (OIDC)
+        run: dart pub publish --force
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          gh release create "v$VERSION" \
+            --title "archbase_flutter v$VERSION" \
+            --notes "$(cat <<EOF
+          📦 https://pub.dev/packages/archbase_flutter/versions/$VERSION
+
+          \`\`\`yaml
+          dependencies:
+            archbase_flutter: ^$VERSION
+          \`\`\`
+
+          Ver [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) para detalhes.
+          EOF
+          )" \
+            --latest
+
+  # -------------------------------------------------------------------------
+  # archbase_flutter_riverpod
+  # -------------------------------------------------------------------------
+  publish-riverpod:
+    name: Publish archbase_flutter_riverpod
+    if: startsWith(github.ref, 'refs/tags/archbase_flutter_riverpod-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: packages/archbase_flutter_riverpod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Verify version casa com a tag
+        id: ver
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/archbase_flutter_riverpod-v}"
+          PUB_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          if [ "$TAG_VERSION" != "$PUB_VERSION" ]; then
+            echo "::error::Tag v$TAG_VERSION não bate com pubspec ($PUB_VERSION)."
+            exit 1
+          fi
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Remove dependency_overrides (não permitido em publish via OIDC)
+        run: |
+          # Dev-time override fica no pubspec; publish remove pra resolver
+          # contra a versão real do pub.dev.
+          python3 -c "
+          import sys
+          import re
+          with open('pubspec.yaml') as f: src = f.read()
+          # Remove o bloco dependency_overrides até o próximo top-level key
+          out = re.sub(r'dependency_overrides:.*?(?=\n[a-z_]+:)', '', src, flags=re.S)
+          with open('pubspec.yaml','w') as f: f.write(out)
+          "
+
+      - name: Pub get (sem override, contra pub.dev)
+        run: flutter pub get
+
+      - name: Publish on pub.dev (OIDC)
+        run: dart pub publish --force
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          gh release create "archbase_flutter_riverpod-v$VERSION" \
+            --title "archbase_flutter_riverpod v$VERSION" \
+            --notes "$(cat <<EOF
+          📦 https://pub.dev/packages/archbase_flutter_riverpod/versions/$VERSION
+
+          \`\`\`yaml
+          dependencies:
+            archbase_flutter_riverpod: ^$VERSION
+          \`\`\`
+
+          Ver [packages/archbase_flutter_riverpod/CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/packages/archbase_flutter_riverpod/CHANGELOG.md).
+          EOF
+          )"
+
+  # -------------------------------------------------------------------------
+  # archbase_flutter_getx
+  # -------------------------------------------------------------------------
+  publish-getx:
+    name: Publish archbase_flutter_getx
+    if: startsWith(github.ref, 'refs/tags/archbase_flutter_getx-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: packages/archbase_flutter_getx
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Verify version casa com a tag
+        id: ver
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/archbase_flutter_getx-v}"
+          PUB_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          if [ "$TAG_VERSION" != "$PUB_VERSION" ]; then
+            echo "::error::Tag v$TAG_VERSION não bate com pubspec ($PUB_VERSION)."
+            exit 1
+          fi
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Remove dependency_overrides
+        run: |
+          python3 -c "
+          import re
+          with open('pubspec.yaml') as f: src = f.read()
+          out = re.sub(r'dependency_overrides:.*?(?=\n[a-z_]+:)', '', src, flags=re.S)
+          with open('pubspec.yaml','w') as f: f.write(out)
+          "
+
+      - name: Pub get (sem override)
+        run: flutter pub get
+
+      - name: Publish on pub.dev (OIDC)
+        run: dart pub publish --force
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          gh release create "archbase_flutter_getx-v$VERSION" \
+            --title "archbase_flutter_getx v$VERSION" \
+            --notes "$(cat <<EOF
+          📦 https://pub.dev/packages/archbase_flutter_getx/versions/$VERSION
+
+          \`\`\`yaml
+          dependencies:
+            archbase_flutter_getx: ^$VERSION
+          \`\`\`
+
+          Ver [packages/archbase_flutter_getx/CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/packages/archbase_flutter_getx/CHANGELOG.md).
+          EOF
+          )"
