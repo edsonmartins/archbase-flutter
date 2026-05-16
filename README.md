@@ -1,7 +1,12 @@
 # Archbase Flutter
 
+[![pub.dev](https://img.shields.io/pub/v/archbase_flutter.svg?label=archbase_flutter&logo=dart)](https://pub.dev/packages/archbase_flutter)
+[![pub.dev riverpod](https://img.shields.io/pub/v/archbase_flutter_riverpod.svg?label=archbase_flutter_riverpod&logo=dart)](https://pub.dev/packages/archbase_flutter_riverpod)
+[![pub.dev getx](https://img.shields.io/pub/v/archbase_flutter_getx.svg?label=archbase_flutter_getx&logo=dart)](https://pub.dev/packages/archbase_flutter_getx)
+
 [![CI](https://github.com/edsonmartins/archbase-flutter/actions/workflows/ci.yml/badge.svg)](https://github.com/edsonmartins/archbase-flutter/actions/workflows/ci.yml)
 [![Maestro Cloud](https://github.com/edsonmartins/archbase-flutter/actions/workflows/maestro-cloud.yml/badge.svg)](https://github.com/edsonmartins/archbase-flutter/actions/workflows/maestro-cloud.yml)
+[![Docs](https://img.shields.io/badge/docs-edsonmartins.github.io-2196F3?logo=read-the-docs)](https://edsonmartins.github.io/archbase-flutter-docs/)
 [![Flutter](https://img.shields.io/badge/Flutter-3.22%2B-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -18,8 +23,21 @@ Framework Flutter da família **Archbase** (junto com `archbase-react` e o backe
 
 ```yaml
 dependencies:
-  archbase_flutter:
-    path: ../archbase-flutter   # ou git/hosted depois
+  archbase_flutter: ^0.5.3
+```
+
+Ou:
+
+```bash
+flutter pub add archbase_flutter
+```
+
+Adapters (escolha um, opcional):
+
+```yaml
+dependencies:
+  archbase_flutter_riverpod: ^0.2.0  # OU
+  archbase_flutter_getx: ^0.2.0
 ```
 
 ## Bootstrap
