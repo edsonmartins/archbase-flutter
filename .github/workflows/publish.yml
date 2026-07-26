@@ -24,6 +24,11 @@ permissions:
   id-token: write
   contents: write
 
+# Pin do Flutter: ver nota em ci.yml (stable mais novo torna IconData final e quebra
+# lucide_icons_flutter 1.x). 3.41.2 é o baseline testado.
+env:
+  FLUTTER_VERSION: "3.41.2"
+
 jobs:
   # -------------------------------------------------------------------------
   # archbase_flutter (lib principal) — disparado por tag `vX.Y.Z`
@@ -40,6 +45,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Pub get
@@ -97,6 +103,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Pub get
@@ -170,6 +177,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Pub get
