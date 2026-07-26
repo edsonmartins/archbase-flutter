@@ -33,6 +33,8 @@ export 'src/services/cache/archbase_cache_service.dart';
 export 'src/services/connectivity/archbase_connectivity_service.dart';
 export 'src/services/offline/archbase_offline_sync_queue.dart';
 export 'src/services/offline/archbase_sync_status.dart';
+// Módulo offline-first (ADR-0001) — motor definitivo (outbox + store + batch).
+export 'src/offline/archbase_offline.dart';
 export 'src/services/geolocation/archbase_geolocation_service.dart';
 export 'src/services/push/archbase_push_notification_service.dart';
 export 'src/services/media/archbase_image_service.dart';
