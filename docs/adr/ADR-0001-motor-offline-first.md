@@ -40,8 +40,9 @@ O sinal técnico mais forte: **todos fugiram do mecanismo de REST nativo do Bric
 
 1. **O `archbase_flutter` passa a prover o motor offline-first como módulo de primeira classe** (`archbase_offline`), com contrato estável, testado e versionado. Os apps consomem; não reimplementam.
 
-2. **Store local = `drift`** (SQLite tipado, reativo, cifrado via SQLCipher), **atrás de uma _port_** (`ArchbaseLocalStore`) para não amarrar os apps a um ORM específico.
+2. **Store local = SQLite cifrado atrás de uma _port_** (`ArchbaseLocalStore`), para não amarrar os apps a um ORM específico.
    - **Brick é descontinuado** como motor de sync REST (revoga o ADR-0001 do promotor). Não usaremos "Brick só como SQLite" — usá-lo fora do seu fluxo de sync é remar contra o design dele.
+   - **Refino na implementação (2026-07-26):** a impl padrão é um **store genérico de documentos sobre `sqflite_sqlcipher`** (`ArchbaseSqfliteStore`), não `drift`. Motivo descoberto ao construir: com o _port_ genérico (`upsert<T>`/`query<T>` sobre JSON) a vantagem tipada do `drift` desaparece — sobraria só reatividade (resolvida por streams), ao custo de **codegen acoplado ao app** e do atrito de SQLCipher (a lib de cifra do `drift` está EOL). O `sqflite_sqlcipher` já foi validado em produção no promotor, é injetado como _opener_ (a cifra fica no app; os testes usam `sqflite_common_ffi`). `drift` continua alternativa válida se um dia quisermos tabelas tipadas por app.
 
 3. **Sincronização = outbox único** (`SyncOperation`) drenado por **protocolo batch** `POST /api/v1/sync/operations` com **ACK por operação**. **Uma superfície só** — sem coexistir com PUT-por-recurso.
 

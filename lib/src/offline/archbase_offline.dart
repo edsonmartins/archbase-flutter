@@ -9,6 +9,8 @@ export 'archbase_syncable.dart';
 export 'archbase_sync_operation.dart';
 export 'archbase_sync_protocol.dart';
 export 'archbase_local_store.dart';
+export 'archbase_entity_codec.dart';
+export 'archbase_sqflite_store.dart';
 export 'archbase_binary_uploader.dart';
 export 'archbase_sync_snapshot.dart';
 export 'archbase_sync_engine.dart';

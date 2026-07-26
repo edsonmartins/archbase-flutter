@@ -36,6 +36,20 @@ class ArchbaseOpBinary {
         remoteId: remoteId ?? this.remoteId,
         meta: meta,
       );
+
+  Map<String, dynamic> toJson() => {
+        'localPath': localPath,
+        'category': category,
+        if (remoteId != null) 'remoteId': remoteId,
+        if (meta != null) 'meta': meta,
+      };
+
+  factory ArchbaseOpBinary.fromJson(Map<String, dynamic> j) => ArchbaseOpBinary(
+        localPath: j['localPath'] as String,
+        category: j['category'] as String,
+        remoteId: j['remoteId'] as String?,
+        meta: (j['meta'] as Map?)?.cast<String, dynamic>(),
+      );
 }
 
 /// Porta de upload. A impl do app reusa o `StorageRepository`/multipart existente.
