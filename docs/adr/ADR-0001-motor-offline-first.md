@@ -60,6 +60,8 @@ O sinal técnico mais forte: **todos fugiram do mecanismo de REST nativo do Bric
 
 7. **Testes do protocolo são _gate_**: idempotência, conflito, erro parcial, dependência e crash-recovery cobertos por teste **antes** de qualquer homologação de app. Nenhuma das tentativas anteriores tinha isso.
 
+8. **Zero código órfão (regra inegociável).** A confusão atual nasceu de **mecanismos convivendo** (Brick + Hive, outbox + fila nativa, `SyncCoordinator` morto). Regra: **cada fatia de migração remove o mecanismo antigo que substitui** — arquivos, dependências do `pubspec`, imports e telas transitórias — **antes** de ser dada como concluída. Nunca deixar dois caminhos para a mesma coisa "para limpar depois". Isso é verificado por **gate automatizado** (analyzer sem `unused_*`/`dead_code`; detecção de arquivos/código não usados; validador de dependências; e uma _ban-list_ de imports proibidos por fatia). Ver contrato §14.
+
 ---
 
 ## 3. Consequências

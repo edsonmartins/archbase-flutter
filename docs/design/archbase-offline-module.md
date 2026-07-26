@@ -331,6 +331,50 @@ Backend: testes de `SyncOperationProcessor` para idempotência, conflito, erro p
 
 ---
 
+## 14. Regra anti-código-órfão (Definition of Done)
+
+> A dívida atual veio de **mecanismos convivendo** (Brick + Hive, outbox + fila nativa, `SyncCoordinator` morto, telas paralelas). Esta seção existe para que isso **não** se repita. É requisito de aceitação, não recomendação.
+
+### 14.1 Princípio
+**Cada fatia que introduz o mecanismo novo REMOVE o antigo no mesmo PR.** Nunca "limpar depois". Se um fluxo passou para o `archbase_offline`, o código antigo daquele fluxo (service/repository/model/adapters/deps/telas transitórias) **deixa de existir** no merge — não fica comentado, não fica "por via das dúvidas".
+
+### 14.2 Definition of Done por fatia (checklist obrigatório)
+- [ ] O mecanismo antigo do fluxo migrado foi **deletado** (arquivos + referências).
+- [ ] Nenhum import proibido restante (ver ban-list §14.4).
+- [ ] Dependências não usadas removidas do `pubspec.yaml` (ex.: `hive`, `brick_*` quando o último uso sair).
+- [ ] `flutter analyze` sem `unused_import` / `unused_element` / `dead_code`.
+- [ ] Sem arquivos órfãos (não referenciados) no `lib/`.
+- [ ] Telas **inalteradas** (diff em `features/*/presentation` só onde a costura exige; nenhuma tela nova "paralela").
+- [ ] Gate automatizado (§14.3) verde no CI.
+
+### 14.3 Gate automatizado (CI + pré-merge)
+Stack de verificação, tudo com saída **zero** para passar:
+1. **Analyzer estrito** — em `analysis_options.yaml`, promover a **error**: `unused_import`, `unused_local_variable`, `unused_element`, `unused_field`, `dead_code`. `flutter analyze` falha o build se houver qualquer um.
+2. **Código/arquivos não usados** — `dart_code_metrics` (`check-unused-code` + `check-unused-files`) → nenhum resultado.
+3. **Dependências órfãs** — `dependency_validator` → sem deps declaradas e não usadas (pega `hive`/`brick_*` esquecidos no `pubspec`).
+4. **Ban-list de imports** — script `tool/check_no_legacy.sh` (§14.4): `grep` retorna zero ocorrências dos padrões proibidos.
+
+### 14.4 Ban-list (evolui a cada fatia aposentada)
+Padrões que, uma vez o mecanismo aposentado, **não podem reaparecer** (o script falha se acharem):
+```
+package:hive            # store legado
+package:brick_          # motor de sync REST descontinuado
+SyncCoordinator         # outbox caseiro legado
+RupturaSyncService      # outboxes por-recurso legados
+RegistroValidadeSyncService
+OfflineStorageService   # wrapper Hive legado
+```
+> A lista é **incremental**: cada padrão entra quando o último uso legítimo sai. Assim o legado nunca "volta" por cópia-e-cola ou merge.
+
+### 14.5 Varredura final (antes de declarar a migração do promotor concluída)
+- Ban-list inteira com **zero** ocorrências no `lib/`.
+- `pubspec.yaml` sem `hive`, `hive_flutter`, `brick_*`.
+- Nenhum arquivo em `lib/` sem referência (unused-files = 0).
+- `git grep -n "TODO.*(migra|legado|remover)"` revisado e zerado.
+- Apenas **um** motor de sync e **um** store local em uso no código.
+
+---
+
 ## 13. Versionamento
 - Novo módulo em `archbase_flutter` → bump **minor** (novos exports) e, quando substituir a `ArchbaseOfflineSyncQueue` atual, **major** com guia de migração no CHANGELOG.
 - Contrato de rede versionado por `X-App-Version` + este documento (`Versão do contrato`).
