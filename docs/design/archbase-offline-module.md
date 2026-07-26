@@ -375,6 +375,33 @@ OfflineStorageService   # wrapper Hive legado
 
 ---
 
+## 15. Referência estudada — pacote `offline_sync` (o que validou e o que evitar)
+
+Analisamos o pacote público `offline_sync` (sqflite + AES + batch). Ele **confirma** o desenho e serve de **checklist de armadilhas**.
+
+**Validou nossas decisões:**
+- Duas tabelas separadas — outbox (`sync_queue`) + store local (`local_data`). = nosso `SyncOperation` + store.
+- Batch com **resultado por item** (`results[]` com `success`/`error`). = nosso ACK por operação.
+- Escrita local **+ enfileira** numa só chamada (`saveLocalData`). = nosso `engine.save()` otimista.
+- `syncProgress` (0..1) + status por `ValueNotifier`. → **incorporado** ao `ArchbaseSyncSnapshot` (adicionar `progress`).
+- Injeção de Connectivity/httpClient/dbPath para teste. = nossas ports.
+
+**Insight novo incorporado:** com **idempotência durável**, o crash-recovery fica trivial — "reenviar tudo que não está `processed`" é seguro (o servidor deduplica → `SKIPPED`). Ou seja, o estado `sending` órfão não precisa de tratamento elaborado; a idempotência é a rede de segurança. (Ver §8.1/§6.1.)
+
+**Armadilhas do `offline_sync` que nosso contrato já previne** (é exatamente o que faltou lá):
+| Bug no `offline_sync` | Nossa salvaguarda |
+|---|---|
+| Sem chave de idempotência (id = autoincrement) → resposta perdida = **duplica no servidor** | `id` UUID do cliente + `processed_sync_operation` (§8.1) |
+| `retry_count = 2` hardcoded (`//TODO`) → backoff/dead-letter quebrados | `attempts`/`nextRetryAt`/`exhausted` reais (§8.4/§8.6) |
+| Conflito = merge por campo no cliente, e o ramo por timestamp é **código morto** (inalcançável) | Conflito **tipado, autoritativo no servidor** (LWW+versão) (§8.2) |
+| `syncData` marca `success` mesmo com itens falhos | `counts` com todos os estados; `success` nunca true com op não resolvida (§7) |
+| Sem dependências / sem binários | `dependsOn` (§8.3) + gating de binário (§8.5) |
+| Chave de criptografia no **SharedPreferences** + **IV estático** (fraqueza cripto) | **SQLCipher** no arquivo inteiro + chave no `flutter_secure_storage` (§4) |
+
+Resumo: nada a "importar" como código (stack e robustez diferentes), mas **confirma o contrato** e cada limitação dele vira um teste do nosso _gate_ (§11).
+
+---
+
 ## 13. Versionamento
 - Novo módulo em `archbase_flutter` → bump **minor** (novos exports) e, quando substituir a `ArchbaseOfflineSyncQueue` atual, **major** com guia de migração no CHANGELOG.
 - Contrato de rede versionado por `X-App-Version` + este documento (`Versão do contrato`).
