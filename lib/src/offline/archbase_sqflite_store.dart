@@ -68,8 +68,8 @@ class ArchbaseSqfliteStore implements ArchbaseLocalStore {
         ack_response TEXT,
         binaries TEXT
       )''');
-    await _db.execute(
-        'CREATE INDEX IF NOT EXISTS idx_op_status ON $_tOp(status)');
+    await _db
+        .execute('CREATE INDEX IF NOT EXISTS idx_op_status ON $_tOp(status)');
     _ready = true;
   }
 
@@ -101,7 +101,9 @@ class ArchbaseSqfliteStore implements ArchbaseLocalStore {
   Future<T?> getById<T extends ArchbaseSyncable>(String id) async {
     final codec = _registry.codecOf<T>();
     final rows = await _db.query(_tEntity,
-        where: 'type = ? AND id = ?', whereArgs: [codec.typeName, id], limit: 1);
+        where: 'type = ? AND id = ?',
+        whereArgs: [codec.typeName, id],
+        limit: 1);
     if (rows.isEmpty) return null;
     return codec.fromJson(_decode(rows.first['data'] as String));
   }
@@ -109,8 +111,8 @@ class ArchbaseSqfliteStore implements ArchbaseLocalStore {
   @override
   Future<List<T>> query<T extends ArchbaseSyncable>([ArchbaseQuery? q]) async {
     final codec = _registry.codecOf<T>();
-    final rows =
-        await _db.query(_tEntity, where: 'type = ?', whereArgs: [codec.typeName]);
+    final rows = await _db
+        .query(_tEntity, where: 'type = ?', whereArgs: [codec.typeName]);
     final where = q?.where;
     final out = <T>[];
     for (final row in rows) {
@@ -180,20 +182,20 @@ class ArchbaseSqfliteStore implements ArchbaseLocalStore {
 
   @override
   Future<ArchbaseSyncOperation?> getOperation(String id) async {
-    final rows = await _db.query(_tOp, where: 'id = ?', whereArgs: [id], limit: 1);
+    final rows =
+        await _db.query(_tOp, where: 'id = ?', whereArgs: [id], limit: 1);
     return rows.isEmpty ? null : _rowToOp(rows.first);
   }
 
   @override
   Future<List<ArchbaseSyncOperation>> openOperations() async {
-    final rows = await _db.query(_tOp,
-        where: 'status IN (?, ?, ?, ?)',
-        whereArgs: [
-          ArchbaseSyncOpStatus.pending.name,
-          ArchbaseSyncOpStatus.sending.name,
-          ArchbaseSyncOpStatus.failed.name,
-          ArchbaseSyncOpStatus.blocked.name,
-        ]);
+    final rows =
+        await _db.query(_tOp, where: 'status IN (?, ?, ?, ?)', whereArgs: [
+      ArchbaseSyncOpStatus.pending.name,
+      ArchbaseSyncOpStatus.sending.name,
+      ArchbaseSyncOpStatus.failed.name,
+      ArchbaseSyncOpStatus.blocked.name,
+    ]);
     return rows.map(_rowToOp).toList();
   }
 

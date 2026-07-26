@@ -59,8 +59,7 @@ void main() {
 
   Future<ArchbaseSqfliteStore> openStore() async {
     final store = ArchbaseSqfliteStore(
-      opener: () =>
-          databaseFactoryFfi.openDatabase(inMemoryDatabasePath),
+      opener: () => databaseFactoryFfi.openDatabase(inMemoryDatabasePath),
       registry: buildRegistry(),
     );
     await store.initialize();
@@ -80,8 +79,8 @@ void main() {
       final all = await store.query<_Pedido>();
       expect(all.length, 2);
 
-      final filtered =
-          await store.query<_Pedido>(const ArchbaseQuery(where: {'pdvId': 'B'}));
+      final filtered = await store
+          .query<_Pedido>(const ArchbaseQuery(where: {'pdvId': 'B'}));
       expect(filtered.map((e) => e.id), ['p2']);
       await store.close();
     });
@@ -118,10 +117,11 @@ void main() {
       expect(got.binaries.single.category, 'FOTO');
       expect(got.status, ArchbaseSyncOpStatus.pending);
 
-      await store.updateOperation(
-          got.copyWith(status: ArchbaseSyncOpStatus.sending));
-      expect((await store.operationsByStatus(ArchbaseSyncOpStatus.sending))
-          .length, 1);
+      await store
+          .updateOperation(got.copyWith(status: ArchbaseSyncOpStatus.sending));
+      expect(
+          (await store.operationsByStatus(ArchbaseSyncOpStatus.sending)).length,
+          1);
       expect((await store.openOperations()).length, 1);
 
       await store.removeOperation('op1');
@@ -129,7 +129,8 @@ void main() {
       await store.close();
     });
 
-    test('motor completo sobre o store real: save→drain→sincronizado', () async {
+    test('motor completo sobre o store real: save→drain→sincronizado',
+        () async {
       final store = await openStore();
       final sender = _AckAllSender();
       final engine = ArchbaseSyncEngine(
@@ -169,7 +170,9 @@ class _AckAllSender implements ArchbaseSyncSender {
     return ArchbaseSyncBatchResponse(
       acks: operations
           .map((o) => ArchbaseSyncAck(
-              id: o.id, status: ArchbaseSyncOpStatus.processed, serverVersion: 1))
+              id: o.id,
+              status: ArchbaseSyncOpStatus.processed,
+              serverVersion: 1))
           .toList(),
     );
   }
