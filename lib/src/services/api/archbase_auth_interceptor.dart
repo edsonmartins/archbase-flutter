@@ -71,7 +71,12 @@ class ArchbaseAuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    final isAuthError = err.response?.statusCode == 401;
+    // 401 (não autenticado) e 403 (token revogado/expirado — alguns backends, como o archbase
+    // security, devolvem 403 quando validam o token contra o store anti-revogação). Nos dois casos
+    // vale UMA tentativa de refresh+retry (protegida por `__retried` contra loop): se for um 403 de
+    // autorização real (sem permissão), o retry cai no mesmo 403 e propaga.
+    final code = err.response?.statusCode;
+    final isAuthError = code == 401 || code == 403;
     final isRefreshCall = err.requestOptions.extra['__isRefresh'] == true;
     final hasRetried = err.requestOptions.extra['__retried'] == true;
 
