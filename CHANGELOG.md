@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.0 — motor offline-first (`archbase_offline`)
+
+### Adicionado
+- Módulo **offline-first** reutilizável em `lib/src/offline/` (barrel `archbase_offline.dart`):
+  - `ArchbaseSyncEngine` — outbox + drain single-flight, backoff exponencial + jitter,
+    `dependsOn` que BLOQUEIA, dead-letter (`exhausted`) com retry manual, gating de binário,
+    snapshot reativo para badges e hook de reconciliação.
+  - `ArchbaseSyncable` / `ArchbaseSyncState` — contrato de entidade sincronizável
+    (id UUID cliente, syncState, clientUpdatedAt, serverVersion, deletedAt).
+  - `ArchbaseSqfliteStore` (implementa `ArchbaseLocalStore`) — store local em single-table
+    JSON + outbox, `watch<T>()` reativo, opener injetável para SQLCipher; registro por
+    `ArchbaseEntityCodec` (sem codegen).
+  - Protocolo em lote (`archbase_sync_protocol.dart`): `ArchbaseSyncSender` (porta),
+    serialização de operações e parsing de ACKs (PROCESSED/SKIPPED/CONFLICT/BLOCKED/
+    REJECTED/FAILED) — casa com `POST /api/v1/sync/operations` do `archbase-offline-sync`.
+  - `ArchbaseBinaryUploader` (porta) para upload de binários em canal separado, com gating.
+- ADR-0001 (motor offline-first) + design do contrato do módulo em `docs/`.
+
 ## 0.5.3 — corrige URL de docs
 
 ### Mudou
