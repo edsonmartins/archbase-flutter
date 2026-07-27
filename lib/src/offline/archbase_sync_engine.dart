@@ -238,8 +238,8 @@ class ArchbaseSyncEngine {
       // Falha de transporte: reverte para pending, mantém tudo. Sem erro de
       // negócio. Reprocessa no próximo ciclo.
       for (final op in sendable) {
-        await _store.updateOperation(
-            op.copyWith(status: ArchbaseSyncOpStatus.pending));
+        await _store
+            .updateOperation(op.copyWith(status: ArchbaseSyncOpStatus.pending));
       }
       await _refreshSnapshot(isSyncing: false, lastError: e.toString());
       return const ArchbaseDrainResult(networkError: true);
@@ -253,8 +253,8 @@ class ArchbaseSyncEngine {
       final ack = acks[op.id];
       if (ack == null) {
         // Sem ACK: trata como transitório → volta a pending.
-        await _store.updateOperation(
-            op.copyWith(status: ArchbaseSyncOpStatus.pending));
+        await _store
+            .updateOperation(op.copyWith(status: ArchbaseSyncOpStatus.pending));
         failed++;
         continue;
       }
@@ -315,7 +315,9 @@ class ArchbaseSyncEngine {
                 lastError: ack.error,
                 nextRetryAt: _nextRetry(attempts)));
             await _reconcile(ArchbaseReconcile(
-                operation: op, entityState: ArchbaseSyncState.pendente, ack: ack));
+                operation: op,
+                entityState: ArchbaseSyncState.pendente,
+                ack: ack));
             failed++;
           }
           break;
@@ -406,8 +408,8 @@ class ArchbaseSyncEngine {
   Future<void> recoverStuck() async {
     final stuck = await _store.operationsByStatus(ArchbaseSyncOpStatus.sending);
     for (final op in stuck) {
-      await _store.updateOperation(
-          op.copyWith(status: ArchbaseSyncOpStatus.pending, clearNextRetryAt: true));
+      await _store.updateOperation(op.copyWith(
+          status: ArchbaseSyncOpStatus.pending, clearNextRetryAt: true));
     }
   }
 

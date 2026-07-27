@@ -144,8 +144,13 @@ ArchbaseSyncAck _ack(String id, ArchbaseSyncOpStatus status,
         error: error);
 
 /// Monta um motor com reconcile que aplica o estado na entidade do store.
-({ArchbaseSyncEngine engine, _MemStore store, _FakeSender sender, _FakeUploader uploader, _Clock clock})
-    _build(_Handler handler, {int maxAttempts = 5}) {
+({
+  ArchbaseSyncEngine engine,
+  _MemStore store,
+  _FakeSender sender,
+  _FakeUploader uploader,
+  _Clock clock
+}) _build(_Handler handler, {int maxAttempts = 5}) {
   final store = _MemStore();
   final sender = _FakeSender(handler);
   final uploader = _FakeUploader();
@@ -165,29 +170,56 @@ ArchbaseSyncAck _ack(String id, ArchbaseSyncOpStatus status,
           serverVersion: r.serverVersion ?? m.serverVersion);
     },
   );
-  return (engine: engine, store: store, sender: sender, uploader: uploader, clock: clock);
+  return (
+    engine: engine,
+    store: store,
+    sender: sender,
+    uploader: uploader,
+    clock: clock
+  );
 }
 
 void main() {
   group('ArchbaseSyncEngine — gate', () {
-    test('1. Idempotência: mesma operationId não duplica; skipped fecha', () async {
-      final h = _build((ops) => ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.skipped)).toList());
-      await h.engine.save(model: _Model('v1'), type: 'T', payload: const {}, operationId: 'op1');
-      await h.engine.save(model: _Model('v1'), type: 'T', payload: const {}, operationId: 'op1');
-      expect((await h.store.openOperations()).length, 1, reason: 'não duplica por id');
+    test('1. Idempotência: mesma operationId não duplica; skipped fecha',
+        () async {
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.skipped)).toList());
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
+      expect((await h.store.openOperations()).length, 1,
+          reason: 'não duplica por id');
 
       await h.engine.drain();
-      expect(await h.store.getOperation('op1'), isNull, reason: 'skipped remove a op');
-      expect((h.store._entities['v1'] as _Model).syncState, ArchbaseSyncState.sincronizado);
+      expect(await h.store.getOperation('op1'), isNull,
+          reason: 'skipped remove a op');
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.sincronizado);
     });
 
     test('2. Conflito: não sobrescreve; entidade vai a erro', () async {
-      final h = _build((ops) => [_ack(ops.first.id, ArchbaseSyncOpStatus.conflict, serverVersion: 9, conflict: {'serverVersion': 9})]);
-      await h.engine.save(model: _Model('v1', serverVersion: 3), type: 'T', payload: const {}, operationId: 'op1');
+      final h = _build((ops) => [
+            _ack(ops.first.id, ArchbaseSyncOpStatus.conflict,
+                serverVersion: 9, conflict: {'serverVersion': 9})
+          ]);
+      await h.engine.save(
+          model: _Model('v1', serverVersion: 3),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
       await h.engine.drain();
       final op = await h.store.getOperation('op1');
       expect(op!.status, ArchbaseSyncOpStatus.conflict);
-      expect((h.store._entities['v1'] as _Model).syncState, ArchbaseSyncState.erro);
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.erro);
     });
 
     test('3. Erro parcial: um conflito não derruba os demais', () async {
@@ -195,83 +227,124 @@ void main() {
             _ack(ops[0].id, ArchbaseSyncOpStatus.processed, serverVersion: 2),
             _ack(ops[1].id, ArchbaseSyncOpStatus.conflict),
           ]);
-      await h.engine.save(model: _Model('a'), type: 'T', payload: const {}, operationId: 'opA');
-      await h.engine.save(model: _Model('b'), type: 'T', payload: const {}, operationId: 'opB');
+      await h.engine.save(
+          model: _Model('a'), type: 'T', payload: const {}, operationId: 'opA');
+      await h.engine.save(
+          model: _Model('b'), type: 'T', payload: const {}, operationId: 'opB');
       await h.engine.drain();
       expect(await h.store.getOperation('opA'), isNull);
-      expect((h.store._entities['a'] as _Model).syncState, ArchbaseSyncState.sincronizado);
-      expect((await h.store.getOperation('opB'))!.status, ArchbaseSyncOpStatus.conflict);
-      expect((h.store._entities['b'] as _Model).syncState, ArchbaseSyncState.erro);
+      expect((h.store._entities['a'] as _Model).syncState,
+          ArchbaseSyncState.sincronizado);
+      expect((await h.store.getOperation('opB'))!.status,
+          ArchbaseSyncOpStatus.conflict);
+      expect(
+          (h.store._entities['b'] as _Model).syncState, ArchbaseSyncState.erro);
     });
 
-    test('4. Dependência: dependente fica blocked até a dependência concluir', () async {
+    test('4. Dependência: dependente fica blocked até a dependência concluir',
+        () async {
       // 1ª rodada: só A é processada; B depende de A e ainda não foi enviada.
       final h = _build((ops) => ops
           .where((o) => o.id == 'opA')
           .map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed))
           .toList());
-      await h.engine.save(model: _Model('a'), type: 'T', payload: const {}, operationId: 'opA');
-      await h.engine.save(model: _Model('b'), type: 'T', payload: const {}, operationId: 'opB', dependsOn: 'opA');
+      await h.engine.save(
+          model: _Model('a'), type: 'T', payload: const {}, operationId: 'opA');
+      await h.engine.save(
+          model: _Model('b'),
+          type: 'T',
+          payload: const {},
+          operationId: 'opB',
+          dependsOn: 'opA');
 
       await h.engine.drain();
       expect(await h.store.getOperation('opA'), isNull, reason: 'A processada');
-      expect((await h.store.getOperation('opB'))!.status, ArchbaseSyncOpStatus.blocked);
+      expect((await h.store.getOperation('opB'))!.status,
+          ArchbaseSyncOpStatus.blocked);
 
       // 2ª rodada: A já não existe (satisfeita) → B libera e processa.
-      h.sender.handler = (ops) => ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList();
+      h.sender.handler = (ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList();
       await h.engine.drain();
       expect(await h.store.getOperation('opB'), isNull);
-      expect((h.store._entities['b'] as _Model).syncState, ArchbaseSyncState.sincronizado);
+      expect((h.store._entities['b'] as _Model).syncState,
+          ArchbaseSyncState.sincronizado);
     });
 
-    test('5. Dead-letter: esgota tentativas → exhausted; retry volta a pending', () async {
-      final h = _build((ops) => [_ack(ops.first.id, ArchbaseSyncOpStatus.failed, error: 'x')], maxAttempts: 2);
-      await h.engine.save(model: _Model('v1'), type: 'T', payload: const {}, operationId: 'op1');
+    test('5. Dead-letter: esgota tentativas → exhausted; retry volta a pending',
+        () async {
+      final h = _build(
+          (ops) =>
+              [_ack(ops.first.id, ArchbaseSyncOpStatus.failed, error: 'x')],
+          maxAttempts: 2);
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
 
       await h.engine.drain(); // attempt 1 → failed
-      expect((await h.store.getOperation('op1'))!.status, ArchbaseSyncOpStatus.failed);
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.failed);
       h.clock.advance(const Duration(minutes: 5)); // passa o backoff
 
       await h.engine.drain(); // attempt 2 → exhausted
       final op = await h.store.getOperation('op1');
       expect(op!.status, ArchbaseSyncOpStatus.exhausted);
-      expect((h.store._entities['v1'] as _Model).syncState, ArchbaseSyncState.erro);
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.erro);
 
       await h.engine.retry('op1');
       final r = await h.store.getOperation('op1');
       expect(r!.status, ArchbaseSyncOpStatus.pending);
       expect(r.attempts, 0);
-      expect((h.store._entities['v1'] as _Model).syncState, ArchbaseSyncState.pendente);
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.pendente);
     });
 
     test('6. Crash-recovery: sending órfão volta a pending', () async {
       final h = _build((ops) => const []);
       await h.store.enqueue(ArchbaseSyncOperation(
-        id: 'op1', type: 'T', aggregateId: 'v1',
-        payload: const {}, clientCreatedAt: h.clock(),
+        id: 'op1',
+        type: 'T',
+        aggregateId: 'v1',
+        payload: const {},
+        clientCreatedAt: h.clock(),
         status: ArchbaseSyncOpStatus.sending,
       ));
       await h.engine.recoverStuck();
-      expect((await h.store.getOperation('op1'))!.status, ArchbaseSyncOpStatus.pending);
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.pending);
     });
 
-    test('7. Gating de binário: foto pendente mantém pendente; sobe → sincronizado', () async {
-      final h = _build((ops) => ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
+    test(
+        '7. Gating de binário: foto pendente mantém pendente; sobe → sincronizado',
+        () async {
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
       h.uploader.ok = false; // upload falha primeiro
       await h.engine.save(
-        model: _Model('v1'), type: 'T', payload: const {}, operationId: 'op1',
-        binaries: const [ArchbaseOpBinary(localPath: '/tmp/f.jpg', category: 'FOTO')],
+        model: _Model('v1'),
+        type: 'T',
+        payload: const {},
+        operationId: 'op1',
+        binaries: const [
+          ArchbaseOpBinary(localPath: '/tmp/f.jpg', category: 'FOTO')
+        ],
       );
 
       await h.engine.drain(); // JSON aceito, binário falha → gating
-      expect((h.store._entities['v1'] as _Model).syncState, ArchbaseSyncState.pendente,
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.pendente,
           reason: 'não pode "mentir" sincronizado sem a foto');
-      expect((await h.store.getOperation('op1'))!.status, ArchbaseSyncOpStatus.pending);
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.pending);
 
       h.uploader.ok = true; // agora a foto sobe
       await h.engine.drain();
       expect(await h.store.getOperation('op1'), isNull);
-      expect((h.store._entities['v1'] as _Model).syncState, ArchbaseSyncState.sincronizado);
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.sincronizado);
     });
 
     test('8. Enum serializado por nome (regressão .value/.name)', () {
@@ -280,12 +353,18 @@ void main() {
     });
 
     test('rede fora: mantém pendente, sem marcar erro de negócio', () async {
-      final h = _build((ops) => ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
-      await h.engine.save(model: _Model('v1'), type: 'T', payload: const {}, operationId: 'op1');
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
       h.sender.throwNetwork = true;
       final r = await h.engine.drain();
       expect(r.networkError, isTrue);
-      expect((await h.store.getOperation('op1'))!.status, ArchbaseSyncOpStatus.pending);
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.pending);
     });
   });
 }

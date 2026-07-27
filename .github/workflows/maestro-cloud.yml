@@ -28,6 +28,11 @@ concurrency:
   group: maestro-cloud-${{ github.ref }}
   cancel-in-progress: true
 
+# Pin do Flutter: ver nota em ci.yml (stable mais novo torna IconData final e quebra
+# lucide_icons_flutter 1.x). 3.41.2 é o baseline testado.
+env:
+  FLUTTER_VERSION: "3.41.2"
+
 jobs:
   cloud-android:
     name: Maestro Cloud (Android)
@@ -60,6 +65,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Pub get (demo)
@@ -108,6 +114,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Pub get (demo)

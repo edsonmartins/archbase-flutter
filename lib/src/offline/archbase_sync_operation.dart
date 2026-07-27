@@ -126,8 +126,7 @@ class ArchbaseSyncOperation {
       dependsOn: dependsOn,
       status: status ?? this.status,
       attempts: attempts ?? this.attempts,
-      nextRetryAt:
-          clearNextRetryAt ? null : (nextRetryAt ?? this.nextRetryAt),
+      nextRetryAt: clearNextRetryAt ? null : (nextRetryAt ?? this.nextRetryAt),
       lastError: clearLastError ? null : (lastError ?? this.lastError),
       processedAt: processedAt ?? this.processedAt,
       ackResponse: ackResponse ?? this.ackResponse,

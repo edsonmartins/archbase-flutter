@@ -11,6 +11,13 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Versão do Flutter fixada: `channel: stable` sem pin passou a resolver um SDK onde
+# `IconData` é `final class`, quebrando lucide_icons_flutter 1.x (`extends IconData`)
+# e, por tabela, a compilação de todos os testes. 3.41.2 é o baseline testado da lib
+# e do app do promotor. Rever ao subir lucide para a linha 2.x/3.x.
+env:
+  FLUTTER_VERSION: "3.41.2"
+
 jobs:
   lib:
     name: archbase_flutter (lib)
@@ -23,6 +30,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Show versions
@@ -37,7 +45,10 @@ jobs:
         run: dart format --output=none --set-exit-if-changed lib test example/lib
 
       - name: Analyze
-        run: flutter analyze 2>&1 | tee analyze.log
+        # Escopado à lib (os adapters têm jobs próprios com pub get + analyze).
+        # `flutter analyze` sem args desce nos subpacotes packages/* não resolvidos
+        # pelo pub get da raiz e falha com "package:get não existe".
+        run: flutter analyze lib test example/lib 2>&1 | tee analyze.log
 
       - name: Upload analyze log
         if: always()
@@ -69,6 +80,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
       - name: Pub get
         working-directory: packages/archbase_flutter_riverpod
@@ -91,6 +103,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
       - name: Pub get
         working-directory: packages/archbase_flutter_getx
@@ -114,6 +127,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Pub get (demo)
@@ -146,6 +160,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Pub get
