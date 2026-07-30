@@ -176,4 +176,9 @@ class _AckAllSender implements ArchbaseSyncSender {
           .toList(),
     );
   }
+
+  @override
+  Future<ArchbaseSyncStatusResponse> queryStatus(List<String> operationIds,
+          {String? deviceId}) async =>
+      ArchbaseSyncStatusResponse(processed: operationIds);
 }

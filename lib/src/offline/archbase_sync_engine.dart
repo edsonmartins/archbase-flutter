@@ -431,6 +431,56 @@ class ArchbaseSyncEngine {
     await _refreshSnapshot();
   }
 
+  /// Operações em erro TERMINAL (conflict/exhausted/rejected) — para o app
+  /// listar com o motivo ([ArchbaseSyncOperation.lastError]) e oferecer ação.
+  Future<List<ArchbaseSyncOperation>> failedOperations() async {
+    final result = <ArchbaseSyncOperation>[];
+    for (final s in const [
+      ArchbaseSyncOpStatus.rejected,
+      ArchbaseSyncOpStatus.exhausted,
+      ArchbaseSyncOpStatus.conflict,
+    ]) {
+      result.addAll(await _store.operationsByStatus(s));
+    }
+    return result;
+  }
+
+  /// Reconciliação por transação (o "já processou?"): para as operações ainda
+  /// não confirmadas localmente (pending/sending/failed/blocked/exhausted),
+  /// pergunta ao servidor quais já foram processadas e fecha essas — marca a
+  /// entidade `sincronizado` e remove a op. Resolve o caso "o servidor deu
+  /// commit mas o cliente perdeu o response" (inclusive as que esgotaram o retry).
+  ///
+  /// Read-only no servidor (não reexecuta a mutação). Tolerante a falha de rede:
+  /// devolve 0 e tenta de novo no próximo ciclo. Retorna quantas foram fechadas.
+  Future<int> reconcilePendentes() async {
+    final candidatas = <ArchbaseSyncOperation>[
+      ...await _store.openOperations(), // pending/sending/failed/blocked
+      ...await _store.operationsByStatus(ArchbaseSyncOpStatus.exhausted),
+    ];
+    if (candidatas.isEmpty) return 0;
+
+    final ids = candidatas.map((o) => o.id).toList();
+    final ArchbaseSyncStatusResponse resp;
+    try {
+      resp = await _sender.queryStatus(ids, deviceId: deviceId);
+    } catch (_) {
+      return 0; // falha de rede → tenta no próximo ciclo
+    }
+
+    final processadas = resp.processed.toSet();
+    var fechadas = 0;
+    for (final op in candidatas) {
+      if (!processadas.contains(op.id)) continue;
+      await _reconcile(ArchbaseReconcile(
+          operation: op, entityState: ArchbaseSyncState.sincronizado));
+      await _store.removeOperation(op.id);
+      fechadas++;
+    }
+    if (fechadas > 0) await _refreshSnapshot();
+    return fechadas;
+  }
+
   // ---------------------------------------------------------------------------
   // Snapshot
   // ---------------------------------------------------------------------------

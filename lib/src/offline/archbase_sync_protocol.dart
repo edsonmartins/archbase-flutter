@@ -80,6 +80,23 @@ class ArchbaseSyncBatchResponse {
   }
 }
 
+/// Resposta da reconciliação por transação (`POST /sync/operations/status`):
+/// dos ids perguntados, quais JÁ FORAM processados no servidor (estão no ledger).
+class ArchbaseSyncStatusResponse {
+  const ArchbaseSyncStatusResponse({required this.processed});
+
+  /// operationIds já processados (o cliente marca esses como sincronizados).
+  final List<String> processed;
+
+  factory ArchbaseSyncStatusResponse.fromJson(Map<String, dynamic> json) {
+    return ArchbaseSyncStatusResponse(
+      processed: (json['processed'] as List? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+    );
+  }
+}
+
 /// Serializa uma operação para o corpo do batch.
 Map<String, dynamic> archbaseSyncOperationToWire(ArchbaseSyncOperation op) {
   return {
@@ -102,5 +119,13 @@ abstract interface class ArchbaseSyncSender {
     List<ArchbaseSyncOperation> operations, {
     String? deviceId,
     bool atomic,
+  });
+
+  /// Reconciliação por transação: pergunta ao servidor quais dos [operationIds]
+  /// já foram processados (estão no ledger). Read-only. Deve lançar em falha de
+  /// rede/transporte (o motor trata como "tenta no próximo ciclo").
+  Future<ArchbaseSyncStatusResponse> queryStatus(
+    List<String> operationIds, {
+    String? deviceId,
   });
 }

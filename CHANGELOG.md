@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.1 — resiliência de sync
+
+### Adicionado
+- **Reconciliação por transação** no motor: `ArchbaseSyncEngine.reconcilePendentes()`
+  pergunta ao servidor (via `ArchbaseSyncSender.queryStatus`) quais das operações
+  ainda não confirmadas (pending/sending/failed/blocked/exhausted) já foram
+  processadas e fecha essas — marca a entidade `sincronizado` e remove a op.
+  Resolve o caso "o servidor deu commit mas o cliente perdeu o response"
+  (inclusive ops que esgotaram o retry). Read-only, por transação individual.
+- `ArchbaseSyncSender.queryStatus(operationIds)` + `ArchbaseSyncStatusResponse`
+  (contrato do endpoint `POST /api/v1/sync/operations/status`).
+- `ArchbaseSyncEngine.failedOperations()` — expõe as ops em erro terminal
+  (conflict/exhausted/rejected) com `lastError`, para o app listar com o motivo.
+
+### Notas
+- Implementadores de `ArchbaseSyncSender` agora precisam do método `queryStatus`
+  (mudança de contrato).
+
 ## 0.6.0 — motor offline-first (`archbase_offline`)
 
 ### Adicionado

@@ -105,12 +105,26 @@ class _FakeSender implements ArchbaseSyncSender {
   bool throwNetwork = false;
   int sends = 0;
 
+  /// operationIds que o "servidor" já processou (para queryStatus).
+  Set<String> processedIds = {};
+  int statusQueries = 0;
+
   @override
   Future<ArchbaseSyncBatchResponse> send(List<ArchbaseSyncOperation> operations,
       {String? deviceId, bool atomic = false}) async {
     sends++;
     if (throwNetwork) throw StateError('network down');
     return ArchbaseSyncBatchResponse(acks: handler(operations));
+  }
+
+  @override
+  Future<ArchbaseSyncStatusResponse> queryStatus(List<String> operationIds,
+      {String? deviceId}) async {
+    statusQueries++;
+    if (throwNetwork) throw StateError('network down');
+    return ArchbaseSyncStatusResponse(
+      processed: operationIds.where(processedIds.contains).toList(),
+    );
   }
 }
 
@@ -203,6 +217,51 @@ void main() {
           reason: 'skipped remove a op');
       expect((h.store._entities['v1'] as _Model).syncState,
           ArchbaseSyncState.sincronizado);
+    });
+
+    test('1b. Reconciliação por transação: op não confirmada que o servidor já '
+        'processou fecha (commit sem response)', () async {
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
+      // Drain com rede fora: o servidor pode ter processado, mas o cliente não
+      // soube — a op fica na fila e a entidade não fecha.
+      h.sender.throwNetwork = true;
+      await h.engine.drain();
+      expect(await h.store.getOperation('op1'), isNotNull);
+      expect((h.store._entities['v1'] as _Model).syncState,
+          isNot(ArchbaseSyncState.sincronizado));
+
+      // O servidor de fato processou. Reconciliação por transação fecha.
+      h.sender.throwNetwork = false;
+      h.sender.processedIds = {'op1'};
+      final fechadas = await h.engine.reconcilePendentes();
+      expect(fechadas, 1);
+      expect(await h.store.getOperation('op1'), isNull,
+          reason: 'reconciliada remove a op');
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.sincronizado);
+    });
+
+    test('1c. Reconciliação não fecha o que o servidor NÃO processou', () async {
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
+      h.sender.throwNetwork = true;
+      await h.engine.drain();
+      h.sender.throwNetwork = false;
+      h.sender.processedIds = {}; // nada processado no servidor
+      final fechadas = await h.engine.reconcilePendentes();
+      expect(fechadas, 0);
+      expect(await h.store.getOperation('op1'), isNotNull);
     });
 
     test('2. Conflito: não sobrescreve; entidade vai a erro', () async {
