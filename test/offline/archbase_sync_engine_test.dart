@@ -164,7 +164,8 @@ ArchbaseSyncAck _ack(String id, ArchbaseSyncOpStatus status,
   _FakeSender sender,
   _FakeUploader uploader,
   _Clock clock
-}) _build(_Handler handler, {int maxAttempts = 5}) {
+}) _build(_Handler handler,
+    {int maxAttempts = 5, int maxRescuesPerOperation = 0}) {
   final store = _MemStore();
   final sender = _FakeSender(handler);
   final uploader = _FakeUploader();
@@ -174,6 +175,7 @@ ArchbaseSyncAck _ack(String id, ArchbaseSyncOpStatus status,
     sender: sender,
     binaryUploader: uploader,
     maxAttempts: maxAttempts,
+    maxRescuesPerOperation: maxRescuesPerOperation,
     clock: clock.call,
     jitter: (_) => 1.0, // determinístico
     reconcile: (r) async {
@@ -485,6 +487,70 @@ void main() {
           supersedeAggregate: true);
       expect(await h.store.getOperation('UPSERT:v1'), isNull);
       expect(await h.store.getOperation('DELETE:v1'), isNotNull);
+    });
+
+    test(
+        '10. Resgate: exhausted volta a pending no drain (maxRescuesPerOperation>0) '
+        'e conclui quando o servidor recupera', () async {
+      var fail = true;
+      final h = _build(
+          (ops) => ops
+              .map((o) => fail
+                  ? _ack(o.id, ArchbaseSyncOpStatus.failed, error: 'x')
+                  : _ack(o.id, ArchbaseSyncOpStatus.processed))
+              .toList(),
+          maxAttempts: 1,
+          maxRescuesPerOperation: 1);
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
+
+      await h.engine.drain(); // 1 tentativa → exhausted
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.exhausted);
+
+      // Servidor recuperou (ex.: dependência voltou): próximo drain resgata
+      // (exhausted→pending) e a op conclui.
+      fail = false;
+      await h.engine.drain();
+      expect(await h.store.getOperation('op1'), isNull,
+          reason: 'resgatada e processada encerra a op');
+      expect((h.store._entities['v1'] as _Model).syncState,
+          ArchbaseSyncState.sincronizado);
+    });
+
+    test(
+        '10b. Resgate respeita o teto: esgotados os resgates, fica no dead-letter',
+        () async {
+      // Sempre falha → cada resgate volta a exhausted; com teto 1, só é resgatada
+      // uma vez e depois permanece em exhausted (sem retry infinito).
+      final h = _build(
+          (ops) => ops
+              .map((o) => _ack(o.id, ArchbaseSyncOpStatus.failed, error: 'x'))
+              .toList(),
+          maxAttempts: 1,
+          maxRescuesPerOperation: 1);
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
+
+      await h.engine.drain(); // → exhausted
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.exhausted);
+
+      await h.engine.drain(); // resgate #1 → pending → falha → exhausted
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.exhausted);
+
+      // Teto atingido: chamada direta não resgata mais.
+      final rescued = await h.engine.rescueExhausted();
+      expect(rescued, 0, reason: 'teto por operação atingido');
+      expect((await h.store.getOperation('op1'))!.status,
+          ArchbaseSyncOpStatus.exhausted);
     });
   });
 }

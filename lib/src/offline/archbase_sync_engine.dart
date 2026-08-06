@@ -78,6 +78,7 @@ class ArchbaseSyncEngine {
     this.deviceId,
     this.batchSize = 50,
     this.maxAttempts = 5,
+    this.maxRescuesPerOperation = 0,
     this.backoffBase = const Duration(seconds: 2),
     DateTime Function()? clock,
     double Function(int attempt)? jitter,
@@ -101,7 +102,17 @@ class ArchbaseSyncEngine {
   final String? deviceId;
   final int batchSize;
   final int maxAttempts;
+
+  /// Teto de RESGATES automáticos por operação (0 = desligado, default). Quando
+  /// > 0, o [drain] promove operações `exhausted` de volta a `pending` até este
+  /// limite — destrava o dead-letter quando o erro pode ter sido resolvido no
+  /// servidor (ex.: a visita-pai voltou), sem virar retry infinito. O contador é
+  /// em memória (por sessão): reiniciar o app zera e permite novo ciclo de resgate.
+  final int maxRescuesPerOperation;
   final Duration backoffBase;
+
+  /// Contador de resgates por operação (em memória, por sessão). Ver [maxRescuesPerOperation].
+  final Map<String, int> _rescueCounts = {};
 
   final ValueNotifier<ArchbaseSyncSnapshot> _snapshot =
       ValueNotifier<ArchbaseSyncSnapshot>(const ArchbaseSyncSnapshot());
@@ -206,6 +217,9 @@ class ArchbaseSyncEngine {
 
   Future<ArchbaseDrainResult> _runDrain() async {
     await recoverStuck();
+    if (maxRescuesPerOperation > 0) {
+      await rescueExhausted(); // dead-letter → pending (com teto por operação)
+    }
     _snapshot.value = _snapshot.value.copyWith(isSyncing: true, progress: 0.0);
 
     final open = await _store.openOperations();
@@ -444,6 +458,28 @@ class ArchbaseSyncEngine {
       await _store.updateOperation(op.copyWith(
           status: ArchbaseSyncOpStatus.pending, clearNextRetryAt: true));
     }
+  }
+
+  /// Resgate do dead-letter: promove operações `exhausted` de volta a `pending`,
+  /// respeitando o teto [maxRescuesPerOperation] por operação (contador em memória,
+  /// por sessão). Destrava a fila quando o erro pode ter sido resolvido no servidor
+  /// (ex.: a dependência voltou a existir), sem virar retry infinito — atingido o
+  /// teto, a op fica no dead-letter para ação manual. Chamado automaticamente pelo
+  /// [drain] quando `maxRescuesPerOperation > 0`; também pode ser invocado à mão.
+  /// Retorna quantas operações resgatou.
+  Future<int> rescueExhausted() async {
+    if (maxRescuesPerOperation <= 0) return 0;
+    final exhausted =
+        await _store.operationsByStatus(ArchbaseSyncOpStatus.exhausted);
+    var rescued = 0;
+    for (final op in exhausted) {
+      final count = _rescueCounts[op.id] ?? 0;
+      if (count >= maxRescuesPerOperation) continue;
+      _rescueCounts[op.id] = count + 1;
+      await retry(op.id); // exhausted → pending
+      rescued++;
+    }
+    return rescued;
   }
 
   /// Reenvio manual de uma operação em erro terminal (conflict/exhausted/
