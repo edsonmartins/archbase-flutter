@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.2 — coalescing anti-ghost + resgate de dead-letter
+
+### Adicionado
+- **Coalescing delete↔upsert (anti-ghost)** no motor:
+  `ArchbaseSyncEngine.save(..., supersedeAggregate: true)` cancela todas as
+  operações do mesmo agregado — abertas **e terminais** (`exhausted`/`rejected`/
+  `conflict`) — antes de enfileirar a nova. Elimina o "registro que ressuscita":
+  um DELETE não deixa para trás um UPSERT no dead-letter que seria recriado depois.
+- **Resgate de dead-letter (opt-in)** via `maxRescuesPerOperation` (default `0` =
+  desligado). Quando `> 0`, o `drain()` promove operações `exhausted` de volta a
+  `pending` até este teto por operação — destrava a fila quando o erro terminal
+  pode ter sido resolvido no servidor (ex.: a dependência voltou a existir), sem
+  virar retry infinito. Contador em memória (por sessão). Também exposto como
+  `ArchbaseSyncEngine.rescueExhausted()` para chamada manual.
+
+### Notas
+- Ambos são **aditivos e opt-in** (defaults preservam o comportamento anterior):
+  atualizar de 0.6.1 não exige nenhuma mudança em quem já usa o motor.
+
 ## 0.6.1 — resiliência de sync
 
 ### Adicionado
