@@ -140,8 +140,6 @@ class ArchbaseSyncEngine {
     bool supersedeAggregate = false,
     bool coalesce = false,
   }) async {
-    await _store.upsert(model);
-
     // Coalescência local por (type, aggregateId) — opt-in, default off.
     // Desacopla a CHAVE DE COALESCÊNCIA (type+aggregateId, estável) do
     // `operationId` (id de mutação, único por envio). Corrige dois furos do
@@ -174,12 +172,38 @@ class ArchbaseSyncEngine {
     // esgotado que é reenviado), RECRIA o registro apagado. Default (false)
     // preserva o comportamento atual — nada muda para quem não opta.
     if (supersedeAggregate) {
+      await _store.upsert(model);
       await _cancelOperationsForAggregate(model.id, except: id);
+      if (await _store.getOperation(id) == null) {
+        await _store.enqueue(
+            _buildOp(id, type, model, payload, dependsOn, binaries));
+      }
+      await _refreshSnapshot();
+      return (await _store.getOperation(id))!;
     }
 
     final existing = await _store.getOperation(id);
     if (existing == null) {
-      final op = ArchbaseSyncOperation(
+      // Caminho comum: entidade + op na MESMA transação quando o store suporta
+      // (SYNC-003); senão, sequencial. Idempotente por id.
+      await _writeEntityAndOperation(
+          model, _buildOp(id, type, model, payload, dependsOn, binaries));
+    } else {
+      // Op já existe (idempotência por id): só a entidade otimista mudou.
+      await _store.upsert(model);
+    }
+    await _refreshSnapshot();
+    return (await _store.getOperation(id))!;
+  }
+
+  ArchbaseSyncOperation _buildOp(
+          String id,
+          String type,
+          ArchbaseSyncable model,
+          Map<String, dynamic> payload,
+          String? dependsOn,
+          List<ArchbaseOpBinary> binaries) =>
+      ArchbaseSyncOperation(
         id: id,
         type: type,
         aggregateId: model.id,
@@ -189,10 +213,18 @@ class ArchbaseSyncEngine {
         dependsOn: dependsOn,
         binaries: binaries,
       );
+
+  /// Grava entidade + op atomicamente quando o store implementa
+  /// [ArchbaseAtomicWriteStore] (SYNC-003); caso contrário, sequencial.
+  Future<void> _writeEntityAndOperation(
+      ArchbaseSyncable model, ArchbaseSyncOperation op) async {
+    final s = _store;
+    if (s is ArchbaseAtomicWriteStore) {
+      await (s as ArchbaseAtomicWriteStore).writeEntityAndOperation(model, op);
+    } else {
+      await _store.upsert(model);
       await _store.enqueue(op);
     }
-    await _refreshSnapshot();
-    return (await _store.getOperation(id))!;
   }
 
   /// Substitui a op pendente do mesmo `(type, aggregateId)` OU enfileira uma nova.
@@ -235,7 +267,8 @@ class ArchbaseSyncEngine {
         attempts: 0,
         binaries: binaries.isNotEmpty ? binaries : target.binaries,
       );
-      await _store.updateOperation(replaced);
+      // Entidade + op substituída na mesma transação (SYNC-003).
+      await _writeEntityAndOperation(model, replaced);
       return replaced;
     }
 
@@ -251,7 +284,7 @@ class ArchbaseSyncEngine {
       dependsOn: dependsOn,
       binaries: binaries,
     );
-    await _store.enqueue(op);
+    await _writeEntityAndOperation(model, op);
     return op;
   }
 

@@ -17,7 +17,8 @@ import 'archbase_local_store.dart';
 import 'archbase_sync_operation.dart';
 import 'archbase_syncable.dart';
 
-class ArchbaseSqfliteStore implements ArchbaseLocalStore {
+class ArchbaseSqfliteStore
+    implements ArchbaseLocalStore, ArchbaseAtomicWriteStore {
   ArchbaseSqfliteStore({
     required Future<Database> Function() opener,
     required ArchbaseEntityRegistry registry,
@@ -167,6 +168,32 @@ class ArchbaseSqfliteStore implements ArchbaseLocalStore {
   Future<void> enqueue(ArchbaseSyncOperation op) async {
     await _db.insert(_tOp, _opToRow(op),
         conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  @override
+  Future<void> writeEntityAndOperation<T extends ArchbaseSyncable>(
+      T model, ArchbaseSyncOperation op) async {
+    final codec = _registry.codecForRuntime(model);
+    // Entidade + op na MESMA transação (SYNC-003): ou as duas gravam, ou
+    // nenhuma. Um crash não deixa mais entidade pendente sem operação.
+    await _db.transaction((txn) async {
+      await txn.insert(
+        _tEntity,
+        {
+          'type': codec.typeName,
+          'id': model.id,
+          'data': jsonEncode(codec.encode(model)),
+          'sync_state': model.syncState.name,
+          'client_updated_at': model.clientUpdatedAt.millisecondsSinceEpoch,
+          'server_version': model.serverVersion,
+          'deleted_at': model.deletedAt?.millisecondsSinceEpoch,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      await txn.insert(_tOp, _opToRow(op),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+    _eventsFor(codec.typeName).add(null);
   }
 
   @override

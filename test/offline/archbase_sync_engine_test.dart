@@ -37,12 +37,23 @@ class _Model implements ArchbaseSyncable {
 }
 
 /// Store em memória — a impl drift real virá depois; aqui prova a lógica do motor.
-class _MemStore implements ArchbaseLocalStore {
+class _MemStore implements ArchbaseLocalStore, ArchbaseAtomicWriteStore {
   final Map<String, ArchbaseSyncable> _entities = {};
   final Map<String, ArchbaseSyncOperation> _ops = {};
 
+  /// Quantas vezes o motor usou a escrita atômica (SYNC-003).
+  int atomicWrites = 0;
+
   @override
   Future<void> initialize({String? encryptionKey}) async {}
+
+  @override
+  Future<void> writeEntityAndOperation<T extends ArchbaseSyncable>(
+      T model, ArchbaseSyncOperation op) async {
+    atomicWrites++;
+    _entities[model.id] = model;
+    _ops[op.id] = op;
+  }
 
   @override
   Future<T?> getById<T extends ArchbaseSyncable>(String id) async =>
@@ -617,6 +628,21 @@ void main() {
 
       expect((await h.store.openOperations()).where((o) => o.type == 'UPD').length,
           2, reason: 'coalescência é por (type, aggregateId)');
+    });
+
+    test('14. SYNC-003: entidade + op novas gravam pela escrita atômica',
+        () async {
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
+
+      expect(h.store.atomicWrites, 0);
+      await h.engine.save(
+          model: _Model('v1'), type: 'T', payload: const {}, operationId: 'op1');
+      expect(h.store.atomicWrites, 1,
+          reason: 'op nova roteia por writeEntityAndOperation, não upsert+enqueue');
+      // entidade e op ficaram consistentes
+      expect(await h.store.getOperation('op1'), isNotNull);
+      expect(await h.store.getById<_Model>('v1'), isNotNull);
     });
   });
 }

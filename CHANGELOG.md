@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.7.0 — integridade de mutação (coalescência + escrita atômica)
+
+### Adicionado
+- **`ArchbaseSyncEngine.save(coalesce: true)`** — coalescência local por
+  `(type, aggregateId)`, opt-in (default `false`). Desacopla a chave de
+  coalescência (estável) do `operationId` (id de mutação, único por envio):
+  - enquanto a op está pendente, uma nova edição do mesmo `(type, aggregateId)`
+    **substitui o payload** da op ainda não enviada (preserva a posição na fila
+    e reusa o id, que nunca saiu do device);
+  - depois do ACK (op removida), a próxima edição vira uma op **nova com UUID**,
+    então o servidor não a devolve como `SKIPPED` por reuso de id.
+  - Elimina a perda silenciosa do anti-padrão de `operationId` estável
+    `TYPE:aggregateId` (edições descartadas após o primeiro envio).
+- **`ArchbaseAtomicWriteStore`** — capacidade OPCIONAL do store: grava a
+  entidade otimista e a operação de outbox na **mesma transação**. O motor a
+  usa quando o store implementa (o `ArchbaseSqfliteStore` implementa); senão,
+  cai no modo sequencial. Evita o estado inconsistente (entidade pendente sem
+  op, ou registro removido antes do delete entrar na fila) após um crash.
+
+### Notas
+- Tudo aditivo/opt-in: atualizar de 0.6.x não muda o comportamento de quem já
+  usa o motor. Nenhuma migração de schema (a coalescência usa as colunas
+  `type`/`aggregate_id` já existentes).
+- Implementações próprias de `ArchbaseLocalStore` seguem válidas sem mudança;
+  para ganhar a escrita atômica, basta também implementar
+  `ArchbaseAtomicWriteStore`.
+
 ## 0.6.2 — coalescing anti-ghost + resgate de dead-letter
 
 ### Adicionado
