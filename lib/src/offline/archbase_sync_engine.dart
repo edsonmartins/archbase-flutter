@@ -126,10 +126,22 @@ class ArchbaseSyncEngine {
     String? operationId,
     String? dependsOn,
     List<ArchbaseOpBinary> binaries = const [],
+    bool supersedeAggregate = false,
   }) async {
     await _store.upsert(model);
 
     final id = operationId ?? _uuid.v4();
+
+    // Opt-in "delete vence upsert" (evita ghost record): antes de enfileirar esta
+    // op, cancela QUALQUER outra op ainda no outbox do MESMO agregado — pending,
+    // sending, blocked ou terminal. Sem isto, um DELETE convive com um UPSERT do
+    // mesmo id e o upsert, drenado DEPOIS (ex.: blocked que desbloqueia, ou
+    // esgotado que é reenviado), RECRIA o registro apagado. Default (false)
+    // preserva o comportamento atual — nada muda para quem não opta.
+    if (supersedeAggregate) {
+      await _cancelOperationsForAggregate(model.id, except: id);
+    }
+
     final existing = await _store.getOperation(id);
     if (existing == null) {
       final op = ArchbaseSyncOperation(
@@ -146,6 +158,27 @@ class ArchbaseSyncEngine {
     }
     await _refreshSnapshot();
     return (await _store.getOperation(id))!;
+  }
+
+  /// Remove do outbox todas as operações do agregado [aggregateId], em QUALQUER
+  /// estado (abertas + terminais), exceto a de id [except]. É a primitiva por trás
+  /// do `supersedeAggregate` do [save] — o DELETE cancela um UPSERT concorrente do
+  /// mesmo id para não ressuscitar o registro. Retorna quantas cancelou.
+  Future<int> _cancelOperationsForAggregate(String aggregateId,
+      {String? except}) async {
+    final all = <ArchbaseSyncOperation>[
+      ...await _store.openOperations(),
+      ...await _store.operationsByStatus(ArchbaseSyncOpStatus.exhausted),
+      ...await _store.operationsByStatus(ArchbaseSyncOpStatus.rejected),
+      ...await _store.operationsByStatus(ArchbaseSyncOpStatus.conflict),
+    ];
+    var canceled = 0;
+    for (final op in all) {
+      if (op.aggregateId != aggregateId || op.id == except) continue;
+      await _store.removeOperation(op.id);
+      canceled++;
+    }
+    return canceled;
   }
 
   // ---------------------------------------------------------------------------

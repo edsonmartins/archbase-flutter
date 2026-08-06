@@ -425,5 +425,66 @@ void main() {
       expect((await h.store.getOperation('op1'))!.status,
           ArchbaseSyncOpStatus.pending);
     });
+
+    test('9. supersedeAggregate: DELETE cancela UPSERT do mesmo agregado '
+        '(anti-ghost), inclusive terminal', () async {
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
+
+      // UPSERT pendente do agregado 'v1'.
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'UPSERT',
+          payload: const {},
+          operationId: 'UPSERT:v1');
+      // Um UPSERT de OUTRO agregado não pode ser afetado.
+      await h.engine.save(
+          model: _Model('v2'),
+          type: 'UPSERT',
+          payload: const {},
+          operationId: 'UPSERT:v2');
+      expect((await h.store.openOperations()).length, 2);
+
+      // DELETE de 'v1' com supersedeAggregate: cancela o UPSERT:v1 antes de enfileirar.
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'DELETE',
+          payload: const {},
+          operationId: 'DELETE:v1',
+          supersedeAggregate: true);
+
+      expect(await h.store.getOperation('UPSERT:v1'), isNull,
+          reason: 'o upsert do agregado apagado foi cancelado');
+      expect(await h.store.getOperation('DELETE:v1'), isNotNull,
+          reason: 'o delete foi enfileirado');
+      expect(await h.store.getOperation('UPSERT:v2'), isNotNull,
+          reason: 'agregado diferente não é tocado');
+    });
+
+    test('9b. supersedeAggregate cancela UPSERT já EXHAUSTED (dead-letter)',
+        () async {
+      // Sender que sempre falha → o upsert esgota as tentativas e vira exhausted.
+      final h = _build((ops) => ops
+          .map((o) => _ack(o.id, ArchbaseSyncOpStatus.failed))
+          .toList(), maxAttempts: 1);
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'UPSERT',
+          payload: const {},
+          operationId: 'UPSERT:v1');
+      await h.engine.drain(); // 1 tentativa → exhausted
+      expect((await h.store.getOperation('UPSERT:v1'))!.status,
+          ArchbaseSyncOpStatus.exhausted);
+
+      // DELETE com supersede cancela até o exhausted (senão o resgate o ressuscitaria).
+      await h.engine.save(
+          model: _Model('v1'),
+          type: 'DELETE',
+          payload: const {},
+          operationId: 'DELETE:v1',
+          supersedeAggregate: true);
+      expect(await h.store.getOperation('UPSERT:v1'), isNull);
+      expect(await h.store.getOperation('DELETE:v1'), isNotNull);
+    });
   });
 }
