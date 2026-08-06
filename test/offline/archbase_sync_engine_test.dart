@@ -552,5 +552,71 @@ void main() {
       expect((await h.store.getOperation('op1'))!.status,
           ArchbaseSyncOpStatus.exhausted);
     });
+
+    test('11. coalesce: 2ª edição PENDENTE substitui o payload (SYNC-002)',
+        () async {
+      final sent = <Map<String, dynamic>>[];
+      final h = _build((ops) {
+        for (final o in ops) {
+          sent.add(o.payload);
+        }
+        return ops
+            .map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed))
+            .toList();
+      });
+
+      await h.engine.save(
+          model: _Model('v1'), type: 'UPD', payload: {'v': 1}, coalesce: true);
+      await h.engine.save(
+          model: _Model('v1'), type: 'UPD', payload: {'v': 2}, coalesce: true);
+
+      // Uma única op pendente do slot (type+aggregateId).
+      expect((await h.store.openOperations()).where((o) => o.type == 'UPD').length,
+          1);
+
+      await h.engine.drain();
+      expect(sent.length, 1, reason: 'coalesceu numa só op');
+      expect(sent.single['v'], 2, reason: 'o payload novo vence');
+    });
+
+    test('12. coalesce: edição APÓS o ACK vira op NOVA com id único (SYNC-001)',
+        () async {
+      final ackedIds = <String>[];
+      final h = _build((ops) {
+        for (final o in ops) {
+          ackedIds.add(o.id);
+        }
+        return ops
+            .map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed))
+            .toList();
+      });
+
+      final op1 = await h.engine.save(
+          model: _Model('v1'), type: 'UPD', payload: {'v': 1}, coalesce: true);
+      await h.engine.drain(); // processed → op removida do outbox
+      expect(await h.store.getOperation(op1.id), isNull);
+
+      final op2 = await h.engine.save(
+          model: _Model('v1'), type: 'UPD', payload: {'v': 2}, coalesce: true);
+      expect(op2.id, isNot(op1.id),
+          reason: 'id de mutação novo — não reusa o id já no ledger do servidor');
+
+      await h.engine.drain();
+      expect(ackedIds, [op1.id, op2.id],
+          reason: 'servidor recebe dois ids distintos → nada de SKIPPED-drop');
+    });
+
+    test('13. coalesce: agregados diferentes NÃO se misturam', () async {
+      final h = _build((ops) =>
+          ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
+
+      await h.engine.save(
+          model: _Model('v1'), type: 'UPD', payload: {'v': 1}, coalesce: true);
+      await h.engine.save(
+          model: _Model('v2'), type: 'UPD', payload: {'v': 1}, coalesce: true);
+
+      expect((await h.store.openOperations()).where((o) => o.type == 'UPD').length,
+          2, reason: 'coalescência é por (type, aggregateId)');
+    });
   });
 }

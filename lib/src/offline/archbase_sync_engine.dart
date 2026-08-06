@@ -138,8 +138,32 @@ class ArchbaseSyncEngine {
     String? dependsOn,
     List<ArchbaseOpBinary> binaries = const [],
     bool supersedeAggregate = false,
+    bool coalesce = false,
   }) async {
     await _store.upsert(model);
+
+    // Coalescência local por (type, aggregateId) — opt-in, default off.
+    // Desacopla a CHAVE DE COALESCÊNCIA (type+aggregateId, estável) do
+    // `operationId` (id de mutação, único por envio). Corrige dois furos do
+    // id estável `TYPE:aggregateId`:
+    //   • enquanto pendente: uma segunda edição SUBSTITUI o payload da op ainda
+    //     não enviada, em vez de ser ignorada (o valor novo é o que vai ao
+    //     servidor);
+    //   • após o ACK (op já removida): a próxima edição vira uma op NOVA com id
+    //     único, então o servidor NÃO a devolve como SKIPPED por reuso de id.
+    // `operationId` é ignorado quando `coalesce` é true — o id é sempre cunhado
+    // pelo motor (reusa o da pendente ao substituir; UUID novo ao enfileirar).
+    if (coalesce) {
+      final op = await _coalesceOrEnqueue(
+        model: model,
+        type: type,
+        payload: payload,
+        dependsOn: dependsOn,
+        binaries: binaries,
+      );
+      await _refreshSnapshot();
+      return op;
+    }
 
     final id = operationId ?? _uuid.v4();
 
@@ -169,6 +193,66 @@ class ArchbaseSyncEngine {
     }
     await _refreshSnapshot();
     return (await _store.getOperation(id))!;
+  }
+
+  /// Substitui a op pendente do mesmo `(type, aggregateId)` OU enfileira uma nova.
+  /// Base do modo `coalesce` do [save] — ver a doc lá.
+  Future<ArchbaseSyncOperation> _coalesceOrEnqueue({
+    required ArchbaseSyncable model,
+    required String type,
+    required Map<String, dynamic> payload,
+    String? dependsOn,
+    List<ArchbaseOpBinary> binaries = const [],
+  }) async {
+    // Só coalescem as PENDENTES (pending/failed/blocked); uma op `sending` está
+    // em voo e não pode ser tocada — nesse caso a edição vira op nova.
+    final matches = (await _store.openOperations())
+        .where((o) =>
+            o.status.isPendingLike &&
+            o.type == type &&
+            o.aggregateId == model.id)
+        .toList()
+      ..sort((a, b) => a.clientCreatedAt.compareTo(b.clientCreatedAt));
+
+    if (matches.isNotEmpty) {
+      final target = matches.first;
+      // Se por algum motivo houver mais de uma pendente do mesmo slot, colapsa
+      // nas extras para não deixar duplicatas na fila.
+      for (final extra in matches.skip(1)) {
+        await _store.removeOperation(extra.id);
+      }
+      final replaced = ArchbaseSyncOperation(
+        id: target.id, // reusa o id: a op nunca saiu do device
+        type: type,
+        aggregateId: model.id,
+        payload: payload, // corrige SYNC-002 (payload novo vence)
+        clientCreatedAt: target.clientCreatedAt, // preserva a posição na fila
+        baseVersion: model.serverVersion,
+        dependsOn: dependsOn ?? target.dependsOn,
+        // Volta a pending e zera o backoff: o valor novo não deve esperar o
+        // retry agendado para o valor antigo.
+        status: ArchbaseSyncOpStatus.pending,
+        attempts: 0,
+        binaries: binaries.isNotEmpty ? binaries : target.binaries,
+      );
+      await _store.updateOperation(replaced);
+      return replaced;
+    }
+
+    // Sem pendente (inclui o caso pós-ACK, já removida): op NOVA com id único —
+    // o servidor não a devolve como SKIPPED por reuso de id (corrige SYNC-001).
+    final op = ArchbaseSyncOperation(
+      id: _uuid.v4(),
+      type: type,
+      aggregateId: model.id,
+      payload: payload,
+      clientCreatedAt: _clock(),
+      baseVersion: model.serverVersion,
+      dependsOn: dependsOn,
+      binaries: binaries,
+    );
+    await _store.enqueue(op);
+    return op;
   }
 
   /// Remove do outbox todas as operações do agregado [aggregateId], em QUALQUER
