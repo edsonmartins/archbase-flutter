@@ -38,18 +38,39 @@ void main() {
       expect(await cache.get<String>('x', (raw) => raw.toString()), isNull);
     });
 
-    test('TTL expira: set com ttl curto e get retorna null', () async {
-      final cache = await newCache(boxName: 'cache_ttl');
-      await cache.set(
-        'k',
-        {'v': 1},
-        ttl: const Duration(milliseconds: 50),
-      );
+    // Os dois testes de TTL abaixo NÃO esperam o relógio passar, e é de propósito.
+    //
+    // A versão anterior gravava com ttl de 50ms, afirmava `has` e só então esperava 80ms para
+    // afirmar a expiração. Ela falhava de vez em quando na suíte completa — e falhava na PRIMEIRA
+    // asserção, não na segunda: sob carga, os 50ms venciam entre o `set` e o `has`, e a entrada
+    // expirava antes de alguém perguntar por ela. Aumentar os tempos deixaria a falha mais rara sem
+    // torná-la impossível; o que ela mede é a máquina, não o cache.
+    //
+    // Sem relógio injetável no serviço, a saída é escolher ttl que não deixe margem para dúvida:
+    // longo demais para expirar durante o teste, ou já vencido no instante da gravação.
+
+    test('entrada dentro do TTL continua disponível', () async {
+      final cache = await newCache(boxName: 'cache_ttl_valido');
+      // Uma hora: nenhuma pausa de GC ou de I/O chega perto disso.
+      await cache.set('k', {'v': 1}, ttl: const Duration(hours: 1));
+
       expect(await cache.has('k'), isTrue);
-      await Future<void>.delayed(const Duration(milliseconds: 80));
+      expect(await cache.get<Map<String, dynamic>>('k', (r) => Map.from(r)),
+          equals({'v': 1}));
+
+      await cache.clear();
+    });
+
+    test('entrada com TTL vencido some do cache', () async {
+      final cache = await newCache(boxName: 'cache_ttl_vencido');
+      // TTL negativo: a entrada nasce com expiresAt no passado. Testa exatamente a mesma regra
+      // (isExpired = agora depois de expiresAt), sem depender de quanto tempo o teste levou.
+      await cache.set('k', {'v': 1}, ttl: const Duration(seconds: -1));
+
       expect(await cache.has('k'), isFalse);
       expect(await cache.get<Map<String, dynamic>>('k', (r) => Map.from(r)),
           isNull);
+
       await cache.clear();
     });
 
