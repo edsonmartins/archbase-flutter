@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+### Mudou
+- Depende de `archbase_flutter: ^0.7.1`
+
+
 ## 0.2.0 — primeira release no pub.dev
 
 ### Adicionado
