@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1 — compatibilidade Firebase 11
+
+### Mudou
+- `mobile_scanner` ^5.2.3 → ^6.0.0 (GoogleMLKit 7 / GoogleDataTransport 10, resolve conflito de pods com firebase_messaging 15.x)
+
+
 ## 0.7.0 — integridade de mutação (coalescência + escrita atômica)
 
 ### Adicionado
