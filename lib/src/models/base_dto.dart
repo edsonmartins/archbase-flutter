@@ -65,7 +65,9 @@ class JsonParse {
   /// Aceita também `dd/MM/yyyy`, `dd/MM/yyyy HH:mm` e `dd/MM/yyyy HH:mm:ss`
   /// (formatos que algumas APIs brasileiras devolvem prontos para exibição).
   static DateTime? _dateBr(String v) {
-    final m = RegExp(r'^(\d{2})/(\d{2})/(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$').firstMatch(v.trim());
+    final m = RegExp(
+            r'^(\d{2})/(\d{2})/(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$')
+        .firstMatch(v.trim());
     if (m == null) return null;
     return DateTime(
       int.parse(m.group(3)!),

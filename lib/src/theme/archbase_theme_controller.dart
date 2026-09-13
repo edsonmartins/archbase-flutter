@@ -33,7 +33,8 @@ class ArchbaseThemeState {
 /// Controla theme mode + acessibilidade, persistindo no [ArchbaseStorageService].
 class ArchbaseThemeController extends ArchbaseService {
   /// [defaultMode] é o tema usado enquanto o usuário não escolher um (padrão: o do sistema).
-  ArchbaseThemeController(this._storage, {ThemeMode defaultMode = ThemeMode.system})
+  ArchbaseThemeController(this._storage,
+      {ThemeMode defaultMode = ThemeMode.system})
       : _defaultMode = defaultMode,
         _state = ArchbaseThemeState(themeMode: defaultMode);
 

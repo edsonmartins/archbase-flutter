@@ -29,10 +29,13 @@ class ArchbaseTheme {
       primaryContainer: colors.primaryLight,
       onPrimaryContainer: colors.primaryDark,
       surfaceContainerLowest: Colors.white,
-      surfaceContainerLow: _mix(colors.surfaceLight, colors.textPrimaryLight, .02),
+      surfaceContainerLow:
+          _mix(colors.surfaceLight, colors.textPrimaryLight, .02),
       surfaceContainer: _mix(colors.surfaceLight, colors.textPrimaryLight, .04),
-      surfaceContainerHigh: _mix(colors.surfaceLight, colors.textPrimaryLight, .06),
-      surfaceContainerHighest: _mix(colors.surfaceLight, colors.textPrimaryLight, .09),
+      surfaceContainerHigh:
+          _mix(colors.surfaceLight, colors.textPrimaryLight, .06),
+      surfaceContainerHighest:
+          _mix(colors.surfaceLight, colors.textPrimaryLight, .09),
       outline: colors.textSecondaryLight,
       outlineVariant: colors.borderLight,
     );
@@ -71,10 +74,13 @@ class ArchbaseTheme {
       primaryContainer: colors.primaryDark,
       onPrimaryContainer: colors.primaryLight,
       surfaceContainerLowest: colors.backgroundDark,
-      surfaceContainerLow: _mix(colors.surfaceDark, colors.textPrimaryDark, .02),
+      surfaceContainerLow:
+          _mix(colors.surfaceDark, colors.textPrimaryDark, .02),
       surfaceContainer: _mix(colors.surfaceDark, colors.textPrimaryDark, .04),
-      surfaceContainerHigh: _mix(colors.surfaceDark, colors.textPrimaryDark, .07),
-      surfaceContainerHighest: _mix(colors.surfaceDark, colors.textPrimaryDark, .10),
+      surfaceContainerHigh:
+          _mix(colors.surfaceDark, colors.textPrimaryDark, .07),
+      surfaceContainerHighest:
+          _mix(colors.surfaceDark, colors.textPrimaryDark, .10),
       outline: colors.textSecondaryDark,
       outlineVariant: colors.borderDark,
     );
@@ -139,7 +145,9 @@ class ArchbaseTheme {
         // Sem sombra, a borda fina separa o card do fundo (principalmente no tema claro).
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: cardElevation == 0 ? BorderSide(color: borderColor) : BorderSide.none,
+          side: cardElevation == 0
+              ? BorderSide(color: borderColor)
+              : BorderSide.none,
         ),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       ),

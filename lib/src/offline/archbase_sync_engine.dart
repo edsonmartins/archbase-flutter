@@ -175,8 +175,8 @@ class ArchbaseSyncEngine {
       await _store.upsert(model);
       await _cancelOperationsForAggregate(model.id, except: id);
       if (await _store.getOperation(id) == null) {
-        await _store.enqueue(
-            _buildOp(id, type, model, payload, dependsOn, binaries));
+        await _store
+            .enqueue(_buildOp(id, type, model, payload, dependsOn, binaries));
       }
       await _refreshSnapshot();
       return (await _store.getOperation(id))!;

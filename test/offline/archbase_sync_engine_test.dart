@@ -232,7 +232,8 @@ void main() {
           ArchbaseSyncState.sincronizado);
     });
 
-    test('1b. Reconciliação por transação: op não confirmada que o servidor já '
+    test(
+        '1b. Reconciliação por transação: op não confirmada que o servidor já '
         'processou fecha (commit sem response)', () async {
       final h = _build((ops) =>
           ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
@@ -260,7 +261,8 @@ void main() {
           ArchbaseSyncState.sincronizado);
     });
 
-    test('1c. Reconciliação não fecha o que o servidor NÃO processou', () async {
+    test('1c. Reconciliação não fecha o que o servidor NÃO processou',
+        () async {
       final h = _build((ops) =>
           ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
       await h.engine.save(
@@ -439,7 +441,8 @@ void main() {
           ArchbaseSyncOpStatus.pending);
     });
 
-    test('9. supersedeAggregate: DELETE cancela UPSERT do mesmo agregado '
+    test(
+        '9. supersedeAggregate: DELETE cancela UPSERT do mesmo agregado '
         '(anti-ghost), inclusive terminal', () async {
       final h = _build((ops) =>
           ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.processed)).toList());
@@ -477,9 +480,10 @@ void main() {
     test('9b. supersedeAggregate cancela UPSERT já EXHAUSTED (dead-letter)',
         () async {
       // Sender que sempre falha → o upsert esgota as tentativas e vira exhausted.
-      final h = _build((ops) => ops
-          .map((o) => _ack(o.id, ArchbaseSyncOpStatus.failed))
-          .toList(), maxAttempts: 1);
+      final h = _build(
+          (ops) =>
+              ops.map((o) => _ack(o.id, ArchbaseSyncOpStatus.failed)).toList(),
+          maxAttempts: 1);
       await h.engine.save(
           model: _Model('v1'),
           type: 'UPSERT',
@@ -582,7 +586,8 @@ void main() {
           model: _Model('v1'), type: 'UPD', payload: {'v': 2}, coalesce: true);
 
       // Uma única op pendente do slot (type+aggregateId).
-      expect((await h.store.openOperations()).where((o) => o.type == 'UPD').length,
+      expect(
+          (await h.store.openOperations()).where((o) => o.type == 'UPD').length,
           1);
 
       await h.engine.drain();
@@ -610,7 +615,8 @@ void main() {
       final op2 = await h.engine.save(
           model: _Model('v1'), type: 'UPD', payload: {'v': 2}, coalesce: true);
       expect(op2.id, isNot(op1.id),
-          reason: 'id de mutação novo — não reusa o id já no ledger do servidor');
+          reason:
+              'id de mutação novo — não reusa o id já no ledger do servidor');
 
       await h.engine.drain();
       expect(ackedIds, [op1.id, op2.id],
@@ -626,8 +632,10 @@ void main() {
       await h.engine.save(
           model: _Model('v2'), type: 'UPD', payload: {'v': 1}, coalesce: true);
 
-      expect((await h.store.openOperations()).where((o) => o.type == 'UPD').length,
-          2, reason: 'coalescência é por (type, aggregateId)');
+      expect(
+          (await h.store.openOperations()).where((o) => o.type == 'UPD').length,
+          2,
+          reason: 'coalescência é por (type, aggregateId)');
     });
 
     test('14. SYNC-003: entidade + op novas gravam pela escrita atômica',
@@ -637,9 +645,13 @@ void main() {
 
       expect(h.store.atomicWrites, 0);
       await h.engine.save(
-          model: _Model('v1'), type: 'T', payload: const {}, operationId: 'op1');
+          model: _Model('v1'),
+          type: 'T',
+          payload: const {},
+          operationId: 'op1');
       expect(h.store.atomicWrites, 1,
-          reason: 'op nova roteia por writeEntityAndOperation, não upsert+enqueue');
+          reason:
+              'op nova roteia por writeEntityAndOperation, não upsert+enqueue');
       // entidade e op ficaram consistentes
       expect(await h.store.getOperation('op1'), isNotNull);
       expect(await h.store.getById<_Model>('v1'), isNotNull);
