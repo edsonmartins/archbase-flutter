@@ -9,6 +9,8 @@ class ApiResponse<T> {
     this.message,
     this.statusCode,
     this.fieldErrors = const [],
+    this.code,
+    this.errorData,
   });
 
   final bool success;
@@ -16,6 +18,13 @@ class ApiResponse<T> {
   final String? message;
   final int? statusCode;
   final List<ApiFieldError> fieldErrors;
+
+  /// Código de erro de negócio devolvido pela API (ex.: `CHAVE_INVALIDA`),
+  /// lido de `code` na raiz ou de `error.code`.
+  final String? code;
+
+  /// Corpo bruto da resposta de erro, para casos que precisam de mais detalhe.
+  final Object? errorData;
 
   bool get isSuccess => success;
   bool get isError => !success;
@@ -34,12 +43,16 @@ class ApiResponse<T> {
     String message, {
     int? statusCode,
     List<ApiFieldError> fieldErrors = const [],
+    String? code,
+    Object? errorData,
   }) {
     return ApiResponse._(
       success: false,
       message: message,
       statusCode: statusCode,
       fieldErrors: fieldErrors,
+      code: code,
+      errorData: errorData,
     );
   }
 
@@ -49,7 +62,9 @@ class ApiResponse<T> {
     throw ApiException(
       message: message ?? 'Falha na operação',
       statusCode: statusCode,
+      code: code,
       fieldErrors: fieldErrors,
+      responseData: errorData,
     );
   }
 
@@ -60,6 +75,8 @@ class ApiResponse<T> {
         message ?? 'Erro desconhecido',
         statusCode: statusCode,
         fieldErrors: fieldErrors,
+        code: code,
+        errorData: errorData,
       );
     }
     return ApiResponse<R>.success(

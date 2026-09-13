@@ -25,34 +25,37 @@ class ArchbaseEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.archbase;
+    // Com pouca altura (teclado aberto, painel baixo) o conteúdo rola em vez de estourar.
     return Padding(
       padding: padding,
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 64, color: colors.textSecondary),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            if (message != null) ...[
-              const SizedBox(height: 8),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 64, color: colors.textSecondary),
+              const SizedBox(height: 16),
               Text(
-                message!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colors.textSecondary,
-                    ),
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
+              if (message != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  message!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 20),
+                ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
+              ],
             ],
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 20),
-              ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
-            ],
-          ],
+          ),
         ),
       ),
     );

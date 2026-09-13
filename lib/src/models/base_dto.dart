@@ -57,9 +57,24 @@ class JsonParse {
     }
     if (value is String) {
       if (value.isEmpty) return null;
-      return DateTime.tryParse(value);
+      return DateTime.tryParse(value) ?? _dateBr(value);
     }
     return null;
+  }
+
+  /// Aceita também `dd/MM/yyyy`, `dd/MM/yyyy HH:mm` e `dd/MM/yyyy HH:mm:ss`
+  /// (formatos que algumas APIs brasileiras devolvem prontos para exibição).
+  static DateTime? _dateBr(String v) {
+    final m = RegExp(r'^(\d{2})/(\d{2})/(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$').firstMatch(v.trim());
+    if (m == null) return null;
+    return DateTime(
+      int.parse(m.group(3)!),
+      int.parse(m.group(2)!),
+      int.parse(m.group(1)!),
+      int.parse(m.group(4) ?? '0'),
+      int.parse(m.group(5) ?? '0'),
+      int.parse(m.group(6) ?? '0'),
+    );
   }
 
   static List<T> list<T>(

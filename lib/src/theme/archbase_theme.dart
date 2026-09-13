@@ -12,6 +12,7 @@ class ArchbaseTheme {
     ArchbaseFontScale fontScale = ArchbaseFontScale.normal,
     String? fontFamily,
     bool highContrast = false,
+    double cardElevation = 1.5,
   }) {
     final scheme = ColorScheme.light(
       primary: colors.primary,
@@ -22,6 +23,18 @@ class ArchbaseTheme {
       onSurface: colors.textPrimaryLight,
       error: colors.error,
       onError: Colors.white,
+    ).copyWith(
+      // Sem isto o Material 3 usa os "containers" padrão (cinza arroxeado) que
+      // destoam da paleta: balões, barras e chips ficam com tom lilás no claro.
+      primaryContainer: colors.primaryLight,
+      onPrimaryContainer: colors.primaryDark,
+      surfaceContainerLowest: Colors.white,
+      surfaceContainerLow: _mix(colors.surfaceLight, colors.textPrimaryLight, .02),
+      surfaceContainer: _mix(colors.surfaceLight, colors.textPrimaryLight, .04),
+      surfaceContainerHigh: _mix(colors.surfaceLight, colors.textPrimaryLight, .06),
+      surfaceContainerHighest: _mix(colors.surfaceLight, colors.textPrimaryLight, .09),
+      outline: colors.textSecondaryLight,
+      outlineVariant: colors.borderLight,
     );
     return _build(
       scheme: scheme,
@@ -34,6 +47,7 @@ class ArchbaseTheme {
       borderColor: highContrast ? colors.textPrimaryLight : colors.borderLight,
       fontScale: fontScale,
       fontFamily: fontFamily,
+      cardElevation: cardElevation,
     );
   }
 
@@ -42,6 +56,7 @@ class ArchbaseTheme {
     ArchbaseFontScale fontScale = ArchbaseFontScale.normal,
     String? fontFamily,
     bool highContrast = false,
+    double cardElevation = 1.5,
   }) {
     final scheme = ColorScheme.dark(
       primary: colors.primary,
@@ -52,6 +67,16 @@ class ArchbaseTheme {
       onSurface: colors.textPrimaryDark,
       error: colors.error,
       onError: Colors.white,
+    ).copyWith(
+      primaryContainer: colors.primaryDark,
+      onPrimaryContainer: colors.primaryLight,
+      surfaceContainerLowest: colors.backgroundDark,
+      surfaceContainerLow: _mix(colors.surfaceDark, colors.textPrimaryDark, .02),
+      surfaceContainer: _mix(colors.surfaceDark, colors.textPrimaryDark, .04),
+      surfaceContainerHigh: _mix(colors.surfaceDark, colors.textPrimaryDark, .07),
+      surfaceContainerHighest: _mix(colors.surfaceDark, colors.textPrimaryDark, .10),
+      outline: colors.textSecondaryDark,
+      outlineVariant: colors.borderDark,
     );
     return _build(
       scheme: scheme,
@@ -64,8 +89,12 @@ class ArchbaseTheme {
       borderColor: highContrast ? colors.textPrimaryDark : colors.borderDark,
       fontScale: fontScale,
       fontFamily: fontFamily,
+      cardElevation: cardElevation,
     );
   }
+
+  /// Mistura [b] sobre [a] na proporção [t] (0..1): tons de superfície derivados da paleta.
+  static Color _mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
 
   static ThemeData _build({
     required ColorScheme scheme,
@@ -78,6 +107,7 @@ class ArchbaseTheme {
     required Color borderColor,
     required ArchbaseFontScale fontScale,
     String? fontFamily,
+    double cardElevation = 1.5,
   }) {
     final textTheme = ArchbaseTextStyles.buildTextTheme(
       primaryColor: textPrimary,
@@ -105,9 +135,11 @@ class ArchbaseTheme {
       ),
       cardTheme: CardThemeData(
         color: cardColor,
-        elevation: 1.5,
+        elevation: cardElevation,
+        // Sem sombra, a borda fina separa o card do fundo (principalmente no tema claro).
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+          side: cardElevation == 0 ? BorderSide(color: borderColor) : BorderSide.none,
         ),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       ),

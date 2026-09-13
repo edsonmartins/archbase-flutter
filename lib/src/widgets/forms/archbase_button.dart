@@ -40,7 +40,10 @@ class ArchbaseButton extends StatelessWidget {
 
     Widget content;
     if (isLoading) {
-      content = const ArchbaseInlineLoading(color: Colors.white);
+      // Botões preenchidos (primary/danger) têm texto branco; os de contorno/ghost usam
+      // a cor primária, senão o spinner some no fundo claro.
+      final preenchido = variant == ArchbaseButtonVariant.primary || variant == ArchbaseButtonVariant.danger;
+      content = ArchbaseInlineLoading(color: preenchido ? Colors.white : Theme.of(context).colorScheme.primary);
     } else if (icon != null) {
       final iconWidget = Icon(icon, size: _iconSize());
       final labelWidget = Flexible(

@@ -16,6 +16,11 @@ class ArchbaseStorageService extends ArchbaseService {
       : _secure = secure ??
             const FlutterSecureStorage(
               aOptions: AndroidOptions(encryptedSharedPreferences: true),
+              // No macOS o keychain "data protection" (padrão do plugin) exige o
+              // entitlement keychain-access-groups e falha silenciosamente em
+              // builds assinados localmente (OSStatus -34018/13). O keychain
+              // clássico funciona em qualquer assinatura.
+              mOptions: MacOsOptions(useDataProtectionKeyChain: false),
             );
 
   final FlutterSecureStorage _secure;

@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.8.0 — token de API sem Bearer, tema derivado da paleta e robustez de auth
+
+### Adicionado
+- **`ArchbaseConfig.authorizationScheme`** — esquema do header `Authorization`.
+  `'Bearer'` (padrão) mantém `Bearer <token>`; string vazia envia o token puro,
+  formato que o archbase-security usa para tokens de API (UUID), já que reserva
+  `Bearer` para JWT.
+- **`ApiResponse.code` e `ApiResponse.errorData`** — código de erro de negócio
+  (`error.code` ou `code` na raiz) e corpo bruto da resposta de erro, propagados
+  pelo `ArchbaseApiClient` e por `orThrow()`/`map()`.
+- **`ArchbaseTheme.light/dark(cardElevation:)`** — elevação dos cards; com `0`
+  o card ganha borda fina (`borderColor`) para se destacar do fundo.
+- **`ArchbaseThemeController(defaultMode:)`** — tema usado enquanto o usuário
+  não escolhe um (antes era sempre o do sistema).
+- **`JsonParse.date`** aceita `dd/MM/yyyy`, `dd/MM/yyyy HH:mm` e
+  `dd/MM/yyyy HH:mm:ss`, além de ISO.
+- **`ArchbaseStorageService`** usa o keychain clássico no macOS
+  (`MacOsOptions(useDataProtectionKeyChain: false)`): o keychain "data
+  protection" exige o entitlement `keychain-access-groups` e falha em builds
+  assinados localmente.
+
+### Corrigido
+- **Loop de logout**: `logout()` é reentrante-seguro e a falha de autenticação
+  (401/403 sem refresh) derruba só a sessão local, sem chamar o logout remoto
+  (que falhava com o mesmo 401/403 e disparava outro logout, indefinidamente).
+- **Erros HTTP no log**: o `ArchbaseErrorInterceptor` rejeitava a cadeia antes
+  do `ArchbaseLoggingInterceptor`; a ordem foi invertida e o `✕ <status>`
+  passa a aparecer. `extra['__noAuthRetry'] = true` desliga o refresh/logout
+  automático para uma chamada específica.
+- **Envelope `{"error": {...}}`**: o interceptor de erros lê `message`, `code`,
+  `path` e `errors` também quando vêm aninhados em `error`.
+- **`ColorScheme` do tema**: `primaryContainer`, `surfaceContainer*`, `outline`
+  e `outlineVariant` derivam da paleta (`ArchbaseColors`) nos dois temas; antes
+  o Material 3 aplicava o cinza arroxeado padrão em balões, barras e chips.
+- **`ArchbaseButton` em loading**: o spinner usa a cor primária nas variantes
+  `secondary`/`ghost` (antes era branco, invisível em fundo claro).
+- **`ArchbaseEmptyState`** rola quando falta altura (teclado aberto) em vez de
+  estourar o layout.
+
 ## 0.7.1 — compatibilidade Firebase 11
 
 ### Mudou

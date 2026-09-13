@@ -63,7 +63,9 @@ abstract class ArchbaseAuthService<U extends ArchbaseUser>
   Future<void> onInit() async {
     apiClient.setRefreshCallback(
       refresh: _refreshFlow,
-      onAuthFailure: () async => logout(),
+      // Token inválido/revogado: derruba a sessão local sem chamar o logout
+      // remoto (a própria chamada remota falharia com o mesmo 401/403).
+      onAuthFailure: () async => logout(callRemote: false),
     );
     await _restoreFromStorage();
   }
@@ -91,20 +93,30 @@ abstract class ArchbaseAuthService<U extends ArchbaseUser>
     return result.user;
   }
 
+  bool _loggingOut = false;
+
   Future<void> logout({bool callRemote = true}) async {
-    if (callRemote) {
-      try {
-        await performRemoteLogout();
-      } catch (_) {
-        // Ignora falha — o logout local é o que importa.
+    // Reentrância: se o logout remoto devolver 401/403, o interceptor chama
+    // onAuthFailure → logout() de novo. Sem esta trava vira loop infinito.
+    if (_loggingOut) return;
+    _loggingOut = true;
+    try {
+      if (callRemote && isAuthenticated.value) {
+        try {
+          await performRemoteLogout();
+        } catch (_) {
+          // Ignora falha — o logout local é o que importa.
+        }
       }
+      await tokens.clear();
+      await tokens.clearUser();
+      currentUser.value = null;
+      isAuthenticated.value = false;
+      _onLoggedOutController.add(null);
+      notifyListeners();
+    } finally {
+      _loggingOut = false;
     }
-    await tokens.clear();
-    await tokens.clearUser();
-    currentUser.value = null;
-    isAuthenticated.value = false;
-    _onLoggedOutController.add(null);
-    notifyListeners();
   }
 
   // ---- Refresh -----------------------------------------------------------

@@ -21,6 +21,7 @@ class ArchbaseConfig {
     this.refreshEndpoint = '/auth/refresh',
     this.logoutEndpoint = '/auth/logout',
     this.publicPaths = const ['/auth/login', '/auth/refresh', '/auth/forgot'],
+    this.authorizationScheme = 'Bearer',
     this.cacheTtl = const Duration(minutes: 30),
     this.maxImageSizeBytes = 5 * 1024 * 1024,
     this.enableLogging,
@@ -57,6 +58,11 @@ class ArchbaseConfig {
 
   /// Endpoints que não exigem token (não passam pelo refresh interceptor).
   final List<String> publicPaths;
+
+  /// Esquema do header `Authorization`. `'Bearer'` (padrão) envia
+  /// `Bearer <token>`; string vazia envia o token puro, formato que o
+  /// archbase-security usa para tokens de API (UUID) em vez de JWT.
+  final String authorizationScheme;
 
   /// TTL padrão do cache.
   final Duration cacheTtl;

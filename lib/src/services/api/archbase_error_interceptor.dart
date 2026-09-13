@@ -29,15 +29,23 @@ class ArchbaseErrorInterceptor extends Interceptor {
     List<ApiFieldError> fields = const [];
 
     if (data is Map) {
-      message = (data['message'] ??
-              data['error'] ??
-              data['detail'] ??
+      // Envelope aninhado {"error": {"code", "message", ...}} (BFFs/Archbase)
+      // ou campos na raiz {"message", "code", ...} (Spring padrão).
+      final nested = data['error'] is Map ? data['error'] as Map : null;
+      final root = nested ?? data;
+      message = (root['message'] ??
+              (nested == null ? data['error'] : null) ??
+              root['detail'] ??
               _defaultFor(status, err.type))
           .toString();
-      code = data['code']?.toString();
-      path = data['path']?.toString();
-      final rawErrors =
-          data['errors'] ?? data['fieldErrors'] ?? data['subErrors'];
+      code = root['code']?.toString();
+      path = (root['path'] ?? data['path'])?.toString();
+      final rawErrors = root['errors'] ??
+          root['fieldErrors'] ??
+          root['subErrors'] ??
+          data['errors'] ??
+          data['fieldErrors'] ??
+          data['subErrors'];
       if (rawErrors is List) {
         fields = rawErrors
             .whereType<Map>()

@@ -20,6 +20,7 @@ class ArchbaseAuthInterceptor extends Interceptor {
     required this.publicPaths,
     this.onAuthFailure,
     this.tenantId,
+    this.authorizationScheme = 'Bearer',
     this.deviceIdProvider,
     this.appVersionProvider,
     this.platformProvider,
@@ -30,6 +31,12 @@ class ArchbaseAuthInterceptor extends Interceptor {
   final OnAuthFailure? onAuthFailure;
   final List<String> publicPaths;
   final String? tenantId;
+
+  /// `'Bearer'` → `Authorization: Bearer <token>`; vazio → só o token.
+  final String authorizationScheme;
+
+  String _authorization(String token) =>
+      authorizationScheme.isEmpty ? token : '$authorizationScheme $token';
 
   final FutureOr<String?> Function()? deviceIdProvider;
   final FutureOr<String?> Function()? appVersionProvider;
@@ -50,7 +57,7 @@ class ArchbaseAuthInterceptor extends Interceptor {
     if (!_isPublic(options.path)) {
       final token = await storage.readSecure(ArchbaseStorageKeys.accessToken);
       if (token != null && token.isNotEmpty) {
-        options.headers['Authorization'] = 'Bearer $token';
+        options.headers['Authorization'] = _authorization(token);
       }
     }
     if (tenantId != null) {
@@ -79,10 +86,13 @@ class ArchbaseAuthInterceptor extends Interceptor {
     final isAuthError = code == 401 || code == 403;
     final isRefreshCall = err.requestOptions.extra['__isRefresh'] == true;
     final hasRetried = err.requestOptions.extra['__retried'] == true;
+    // `extra['__noAuthRetry'] = true` (ex.: chamada de logout) desliga refresh/logout automático.
+    final noAuthRetry = err.requestOptions.extra['__noAuthRetry'] == true;
 
     if (!isAuthError ||
         isRefreshCall ||
         hasRetried ||
+        noAuthRetry ||
         _isPublic(err.requestOptions.path)) {
       handler.next(err);
       return;
@@ -91,7 +101,7 @@ class ArchbaseAuthInterceptor extends Interceptor {
     try {
       final newToken = await _coordinatedRefresh();
       final retryRequest = err.requestOptions.copyWith();
-      retryRequest.headers['Authorization'] = 'Bearer $newToken';
+      retryRequest.headers['Authorization'] = _authorization(newToken);
       retryRequest.extra = {...retryRequest.extra, '__retried': true};
 
       final dio = Dio(BaseOptions(baseUrl: retryRequest.baseUrl));

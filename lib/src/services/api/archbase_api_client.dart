@@ -81,6 +81,7 @@ class ArchbaseApiClient extends ArchbaseService {
         storage: storage,
         publicPaths: cfg.publicPaths,
         tenantId: cfg.tenantId,
+        authorizationScheme: cfg.authorizationScheme,
         deviceIdProvider: _deviceIdProvider ??
             () async => storage.read(ArchbaseStorageKeys.deviceId),
         appVersionProvider: () async =>
@@ -103,10 +104,12 @@ class ArchbaseApiClient extends ArchbaseService {
       ),
     );
 
-    dio.interceptors.add(ArchbaseErrorInterceptor());
+    // Log antes do conversor de erros: o ErrorInterceptor rejeita a cadeia e os
+    // interceptors seguintes não veem o erro (o "✕" nunca aparecia).
     if (cfg.loggingEnabled) {
       dio.interceptors.add(ArchbaseLoggingInterceptor());
     }
+    dio.interceptors.add(ArchbaseErrorInterceptor());
     return dio;
   }
 
@@ -280,6 +283,8 @@ class ArchbaseApiClient extends ArchbaseService {
         api.message,
         statusCode: api.statusCode,
         fieldErrors: api.fieldErrors,
+        code: api.code,
+        errorData: api.responseData,
       );
     } catch (e, st) {
       _reportUnexpected(e, st);
