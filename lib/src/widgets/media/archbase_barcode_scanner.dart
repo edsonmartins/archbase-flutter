@@ -72,6 +72,15 @@ class _ArchbaseBarcodeScannerState extends State<ArchbaseBarcodeScanner> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        // O appBarTheme do ArchbaseTheme fixa a cor do título e dos ícones
+        // (textPrimary), que vence o foregroundColor: sem isto, o título sai
+        // escuro sobre o preto da câmera.
+        titleTextStyle: Theme.of(context)
+            .appBarTheme
+            .titleTextStyle
+            ?.copyWith(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actionsIconTheme: const IconThemeData(color: Colors.white),
         title: Text(widget.title),
         actions: [
           IconButton(
@@ -107,7 +116,8 @@ class _ArchbaseBarcodeScannerState extends State<ArchbaseBarcodeScanner> {
             ),
           ),
           Positioned(
-            bottom: 32,
+            // Acima da barra de navegação do Android de borda a borda.
+            bottom: 32 + MediaQuery.paddingOf(context).bottom,
             left: 0,
             right: 0,
             child: Center(
