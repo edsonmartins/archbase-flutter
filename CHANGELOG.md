@@ -1,13 +1,6 @@
 # Changelog
 
-## 0.8.2 — leitor de código legível em tela cheia
-
-A 0.8.1 não chegou ao pub.dev (a publicação pela tag travou); esta versão leva o mesmo conteúdo.
-
-### Corrigido
-- **Publicação pela tag** — o workflow registra o token OIDC no `pub` antes do `dart pub publish` (o `subosito/flutter-action` não faz isso, e o pub caía no login pelo navegador até o timeout) (PR #5).
-
-## 0.8.1 — não publicada
+## 0.8.1 — leitor de código legível em tela cheia
 
 ### Corrigido
 - **`ArchbaseBarcodeScanner`** — a dica de enquadramento passa a descontar a barra de navegação do sistema (não fica mais escondida atrás dela em telas de borda a borda), e o título e os ícones da barra superior saem brancos sobre a câmera, sem herdar as cores do `appBarTheme` do `ArchbaseTheme` (PR #4).
