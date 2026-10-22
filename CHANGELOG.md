@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1 — leitor de código legível em tela cheia
+
+### Corrigido
+- **`ArchbaseBarcodeScanner`** — a dica de enquadramento passa a descontar a barra de navegação do sistema (não fica mais escondida atrás dela em telas de borda a borda), e o título e os ícones da barra superior saem brancos sobre a câmera, sem herdar as cores do `appBarTheme` do `ArchbaseTheme` (PR #4).
+
 ## 0.8.0 — token de API sem Bearer, tema derivado da paleta e robustez de auth
 
 ### Adicionado
