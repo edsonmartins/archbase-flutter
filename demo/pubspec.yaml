@@ -13,7 +13,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   archbase_flutter:
     path: ..
-  lucide_icons_flutter: ^1.2.0
+  lucide_icons_flutter: ^4.0.1
   dio: ^5.7.0
 
 dev_dependencies:
