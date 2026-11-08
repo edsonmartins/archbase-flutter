@@ -94,14 +94,45 @@ class ArchbaseStorageService extends ArchbaseService {
 
   // --- Secure --------------------------------------------------------------
 
-  Future<String?> readSecure(String key) => _secure.read(key: key);
+  // O `ArchbaseAuthInterceptor` lê o token a cada requisição. Ir ao keystore/keychain em toda
+  // leitura custa dezenas a centenas de ms por chamada no Android, e as leituras entram em fila:
+  // uma tela que dispara 8 requisições espera o armazenamento seguro 8 vezes. A leitura passa a
+  // ser guardada em memória por chave — e, enquanto a primeira está em andamento, as demais
+  // esperam a mesma, sem disparar outras. Toda escrita e remoção por este serviço atualiza a
+  // memória; quem gravar no armazenamento seguro por fora dele não é visto até o app reabrir.
+  final Map<String, Future<String?>> _secureCache = {};
 
-  Future<void> writeSecure(String key, String value) =>
-      _secure.write(key: key, value: value);
+  Future<String?> readSecure(String key) {
+    final emMemoria = _secureCache[key];
+    if (emMemoria != null) return emMemoria;
+    final lendo = _secure.read(key: key);
+    _secureCache[key] = lendo;
+    // Falha na leitura não fica guardada: a próxima tenta de novo.
+    lendo.catchError((Object _) {
+      if (identical(_secureCache[key], lendo)) _secureCache.remove(key);
+      return null;
+    });
+    return lendo;
+  }
 
-  Future<void> removeSecure(String key) => _secure.delete(key: key);
+  Future<void> writeSecure(String key, String value) async {
+    // Tira da memória antes de gravar: se a gravação falhar, a próxima leitura vai ao
+    // armazenamento em vez de devolver um valor que não chegou a ser gravado.
+    _secureCache.remove(key);
+    await _secure.write(key: key, value: value);
+    _secureCache[key] = Future.value(value);
+  }
 
-  Future<void> clearSecure() => _secure.deleteAll();
+  Future<void> removeSecure(String key) async {
+    _secureCache.remove(key);
+    await _secure.delete(key: key);
+    _secureCache[key] = Future.value(null);
+  }
+
+  Future<void> clearSecure() async {
+    _secureCache.clear();
+    await _secure.deleteAll();
+  }
 
   // --- Misc ----------------------------------------------------------------
 

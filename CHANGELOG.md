@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.2 — token lido da memória, não do armazenamento seguro a cada requisição
+
+### Corrigido
+- **`ArchbaseStorageService.readSecure`** — a leitura passa a ficar em memória por chave. O `ArchbaseAuthInterceptor` lê o token em toda requisição, e cada ida ao keystore do Android custava ~0,2 s em fila: uma tela com 8 chamadas esperava o armazenamento 8 vezes. Leituras simultâneas esperam a mesma ida; `writeSecure`, `removeSecure` e `clearSecure` atualizam a memória; leitura que falha não fica guardada. Valor gravado no armazenamento seguro **por fora** deste serviço só é visto depois de o app reabrir.
+
 ## 0.8.1 — leitor de código legível em tela cheia
 
 ### Corrigido

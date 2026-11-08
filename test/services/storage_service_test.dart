@@ -1,4 +1,5 @@
 import 'package:archbase_flutter/archbase_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -86,4 +87,91 @@ void main() {
       expect(notifications, 1);
     });
   });
+
+  // O interceptor de auth lê o token a cada requisição; ir ao keystore em toda leitura
+  // enfileirava ~0,2 s por chamada no Android.
+  group('ArchbaseStorageService — seguro em memória', () {
+    late _SeguroContado seguro;
+
+    setUp(() {
+      FlutterSecureStorage.setMockInitialValues({'token': 'abc'});
+      seguro = _SeguroContado();
+    });
+
+    Future<ArchbaseStorageService> comSeguro() async {
+      final s = ArchbaseStorageService(secure: seguro);
+      await s.init();
+      return s;
+    }
+
+    test('lê o armazenamento uma vez e serve as seguintes da memória', () async {
+      final s = await comSeguro();
+      for (var i = 0; i < 5; i++) {
+        expect(await s.readSecure('token'), 'abc');
+      }
+      expect(seguro.leituras, 1);
+    });
+
+    test('leituras simultâneas esperam a mesma ida ao armazenamento', () async {
+      final s = await comSeguro();
+      final lidas = await Future.wait(List.generate(8, (_) => s.readSecure('token')));
+      expect(lidas, everyElement('abc'));
+      expect(seguro.leituras, 1);
+    });
+
+    test('a escrita atualiza a memória sem nova leitura', () async {
+      final s = await comSeguro();
+      await s.readSecure('token');
+      await s.writeSecure('token', 'novo');
+      expect(await s.readSecure('token'), 'novo');
+      expect(seguro.leituras, 1);
+    });
+
+    test('a remoção e o clear não deixam o token antigo na memória', () async {
+      final s = await comSeguro();
+      await s.readSecure('token');
+      await s.removeSecure('token');
+      expect(await s.readSecure('token'), isNull);
+
+      await s.writeSecure('token', 'outro');
+      await s.clearSecure();
+      expect(await s.readSecure('token'), isNull);
+    });
+
+    test('ausente também fica na memória', () async {
+      final s = await comSeguro();
+      expect(await s.readSecure('nada'), isNull);
+      expect(await s.readSecure('nada'), isNull);
+      expect(seguro.leituras, 1);
+    });
+
+    test('leitura que falha não fica guardada', () async {
+      final s = await comSeguro();
+      seguro.falhar = true;
+      await expectLater(s.readSecure('token'), throwsA(isA<StateError>()));
+      seguro.falhar = false;
+      expect(await s.readSecure('token'), 'abc');
+      expect(seguro.leituras, 2);
+    });
+  });
+}
+
+class _SeguroContado extends FlutterSecureStorage {
+  int leituras = 0;
+  bool falhar = false;
+
+  @override
+  Future<String?> read({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) {
+    leituras++;
+    if (falhar) return Future.error(StateError('keystore indisponível'));
+    return super.read(key: key);
+  }
 }
