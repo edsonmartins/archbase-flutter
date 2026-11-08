@@ -104,7 +104,8 @@ void main() {
       return s;
     }
 
-    test('lê o armazenamento uma vez e serve as seguintes da memória', () async {
+    test('lê o armazenamento uma vez e serve as seguintes da memória',
+        () async {
       final s = await comSeguro();
       for (var i = 0; i < 5; i++) {
         expect(await s.readSecure('token'), 'abc');
@@ -114,7 +115,8 @@ void main() {
 
     test('leituras simultâneas esperam a mesma ida ao armazenamento', () async {
       final s = await comSeguro();
-      final lidas = await Future.wait(List.generate(8, (_) => s.readSecure('token')));
+      final lidas =
+          await Future.wait(List.generate(8, (_) => s.readSecure('token')));
       expect(lidas, everyElement('abc'));
       expect(seguro.leituras, 1);
     });
