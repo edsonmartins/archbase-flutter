@@ -59,7 +59,7 @@ dependencies:
 
   # UI / Design
   flutter_screenutil: ^5.9.3
-  lucide_icons_flutter: ^1.2.0
+  lucide_icons_flutter: ^4.0.1
   shimmer: ^3.0.0
   fl_chart: ^0.69.2
   google_fonts: ^6.2.1
